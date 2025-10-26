@@ -1,7 +1,7 @@
 /*
- * Insurance Management Form
+ * Damages Management Form
  */
-package carrental.server.client;
+package carrental.server;
 
 import java.sql.*;
 import javax.swing.*;
@@ -10,37 +10,57 @@ import javax.swing.*;
  *
  * @author Izaek Kisuule
  */
-public class InsuranceMgt extends javax.swing.JFrame {
+public class DamagesMgt extends javax.swing.JFrame {
 
     /**
-     * Creates new form InsuranceMgt
+     * Creates new form DamagesMgt
      */
-    public InsuranceMgt() {
+    public DamagesMgt() {
         initComponents();
-        setSize(750, 750);
-        setTitle("Insurance Management - Car Rental System");
+        setSize(900, 750);
+        setTitle("Damages Management - Car Rental System");
         setLocationRelativeTo(null);
-        loadInsuranceIds();
+        loadDamageIds();
+        loadRentalIds();
         loadCarIds();
     }
 
-    private void loadInsuranceIds() {
-        cmbInsuranceId.removeAllItems();
-        cmbInsuranceId.addItem("Select Insurance");
+    private void loadDamageIds() {
+        cmbDamageId.removeAllItems();
+        cmbDamageId.addItem("Select Damage");
 
         try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT insurance_id, policy_number FROM insurance ORDER BY insurance_id";
+            String sql = "SELECT damage_id, status FROM damages ORDER BY damage_id";
             Statement st = conn.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
-                int insuranceId = rs.getInt("insurance_id");
-                String policyNumber = rs.getString("policy_number");
-                cmbInsuranceId.addItem(insuranceId + " - " + policyNumber);
+                int damageId = rs.getInt("damage_id");
+                String status = rs.getString("status");
+                cmbDamageId.addItem(damageId + " - " + status);
             }
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading insurance IDs: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error loading damage IDs: " + ex.getMessage());
+        }
+    }
+
+    private void loadRentalIds() {
+        cmbRentalId.removeAllItems();
+        cmbRentalId.addItem("Select Rental");
+
+        try (Connection conn = DbConnection.getConnection()) {
+            String sql = "SELECT rental_id FROM rentals ORDER BY rental_id";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                int rentalId = rs.getInt("rental_id");
+                cmbRentalId.addItem(String.valueOf(rentalId));
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error loading rental IDs: " + ex.getMessage());
         }
     }
 
@@ -74,23 +94,20 @@ public class InsuranceMgt extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblInsuranceId = new javax.swing.JLabel();
+        lblDamageId = new javax.swing.JLabel();
+        lblRentalId = new javax.swing.JLabel();
         lblCarId = new javax.swing.JLabel();
-        lblPolicyNumber = new javax.swing.JLabel();
-        lblInsuranceCompany = new javax.swing.JLabel();
-        lblCoverageAmount = new javax.swing.JLabel();
-        lblPremiumAmount = new javax.swing.JLabel();
-        lblStartDate = new javax.swing.JLabel();
-        lblEndDate = new javax.swing.JLabel();
+        lblDescription = new javax.swing.JLabel();
+        lblRepairCost = new javax.swing.JLabel();
+        lblReportedDate = new javax.swing.JLabel();
         lblStatus = new javax.swing.JLabel();
-        cmbInsuranceId = new javax.swing.JComboBox<>();
+        cmbDamageId = new javax.swing.JComboBox<>();
+        cmbRentalId = new javax.swing.JComboBox<>();
         cmbCarId = new javax.swing.JComboBox<>();
-        txtPolicyNumber = new javax.swing.JTextField();
-        txtInsuranceCompany = new javax.swing.JTextField();
-        txtCoverageAmount = new javax.swing.JTextField();
-        txtPremiumAmount = new javax.swing.JTextField();
-        dateStart = new com.toedter.calendar.JDateChooser();
-        dateEnd = new com.toedter.calendar.JDateChooser();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtDescription = new javax.swing.JTextArea();
+        txtRepairCost = new javax.swing.JTextField();
+        dateReported = new com.toedter.calendar.JDateChooser();
         cmbStatus = new javax.swing.JComboBox<>();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
@@ -101,29 +118,31 @@ public class InsuranceMgt extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        lblInsuranceId.setText("Insurance ID");
+        lblDamageId.setText("Damage ID");
+
+        lblRentalId.setText("Rental ID");
 
         lblCarId.setText("Car");
 
-        lblPolicyNumber.setText("Policy Number");
+        lblDescription.setText("Description");
 
-        lblInsuranceCompany.setText("Insurance Company");
+        lblRepairCost.setText("Repair Cost");
 
-        lblCoverageAmount.setText("Coverage Amount");
-
-        lblPremiumAmount.setText("Premium Amount");
-
-        lblStartDate.setText("Start Date");
-
-        lblEndDate.setText("End Date");
+        lblReportedDate.setText("Reported Date");
 
         lblStatus.setText("Status");
 
-        cmbInsuranceId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Insurance" }));
+        cmbDamageId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Damage" }));
+
+        cmbRentalId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Rental" }));
 
         cmbCarId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Car" }));
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Active", "Expired" }));
+        txtDescription.setColumns(20);
+        txtDescription.setRows(5);
+        jScrollPane1.setViewportView(txtDescription);
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Reported", "Assessed", "Repaired" }));
 
         btnAdd.setText("Add");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -176,26 +195,22 @@ public class InsuranceMgt extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lblInsuranceId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblDamageId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblRentalId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblCarId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblPolicyNumber, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblInsuranceCompany, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblCoverageAmount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblPremiumAmount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblRepairCost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblReportedDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cmbInsuranceId, 0, 250, Short.MAX_VALUE)
+                            .addComponent(cmbDamageId, 0, 250, Short.MAX_VALUE)
+                            .addComponent(cmbRentalId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cmbCarId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtPolicyNumber)
-                            .addComponent(txtInsuranceCompany)
-                            .addComponent(txtCoverageAmount)
-                            .addComponent(txtPremiumAmount)
-                            .addComponent(dateStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(dateEnd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cmbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(txtRepairCost)
+                            .addComponent(dateReported, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(11, 11, 11)
                         .addComponent(btnAdd)
@@ -218,36 +233,28 @@ public class InsuranceMgt extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblInsuranceId)
-                    .addComponent(cmbInsuranceId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblDamageId)
+                    .addComponent(cmbDamageId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblRentalId)
+                    .addComponent(cmbRentalId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblCarId)
                     .addComponent(cmbCarId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblDescription)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPolicyNumber)
-                    .addComponent(txtPolicyNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblInsuranceCompany)
-                    .addComponent(txtInsuranceCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblCoverageAmount)
-                    .addComponent(txtCoverageAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPremiumAmount)
-                    .addComponent(txtPremiumAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblRepairCost)
+                    .addComponent(txtRepairCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStartDate)
-                    .addComponent(dateStart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblEndDate)
-                    .addComponent(dateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblReportedDate)
+                    .addComponent(dateReported, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
@@ -268,61 +275,69 @@ public class InsuranceMgt extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        String selectedRental = cmbRentalId.getSelectedItem().toString();
         String selectedCar = cmbCarId.getSelectedItem().toString();
 
-        if (selectedCar.equals("Select Car") || txtPolicyNumber.getText().isEmpty() || 
-            txtInsuranceCompany.getText().isEmpty() || txtPremiumAmount.getText().isEmpty() ||
-            dateStart.getDate() == null || dateEnd.getDate() == null) {
+        if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car") || 
+            txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
             JOptionPane.showMessageDialog(this, "Please fill all required fields!");
             return;
         }
 
+        int rentalId = Integer.parseInt(selectedRental);
         int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
 
         try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO insurance(car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status) VALUES (?,?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO damages(rental_id, car_id, description, repair_cost, reported_date, status) VALUES (?,?,?,?,?,?)";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setString(2, txtPolicyNumber.getText());
-            pst.setString(3, txtInsuranceCompany.getText());
+            pst.setInt(1, rentalId);
+            pst.setInt(2, carId);
+            pst.setString(3, txtDescription.getText());
             
-            if (txtCoverageAmount.getText().isEmpty()) {
+            if (txtRepairCost.getText().isEmpty()) {
                 pst.setNull(4, java.sql.Types.DECIMAL);
             } else {
-                pst.setDouble(4, Double.parseDouble(txtCoverageAmount.getText()));
+                pst.setDouble(4, Double.parseDouble(txtRepairCost.getText()));
             }
             
-            pst.setDouble(5, Double.parseDouble(txtPremiumAmount.getText()));
-            pst.setDate(6, new java.sql.Date(dateStart.getDate().getTime()));
-            pst.setDate(7, new java.sql.Date(dateEnd.getDate().getTime()));
-            pst.setString(8, cmbStatus.getSelectedItem().toString());
+            pst.setDate(5, new java.sql.Date(dateReported.getDate().getTime()));
+            pst.setString(6, cmbStatus.getSelectedItem().toString());
 
             pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Insurance Added Successfully!");
-            loadInsuranceIds();
+            JOptionPane.showMessageDialog(this, "Damage Record Added Successfully!");
+            loadDamageIds();
             clearFields();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding insurance: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error adding damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindActionPerformed
-        String selected = cmbInsuranceId.getSelectedItem().toString();
-        if (selected.equals("Select Insurance")) {
-            JOptionPane.showMessageDialog(this, "Please select an insurance!");
+        String selected = cmbDamageId.getSelectedItem().toString();
+        if (selected.equals("Select Damage")) {
+            JOptionPane.showMessageDialog(this, "Please select a damage record!");
             return;
         }
 
-        int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
+        int damageId = Integer.parseInt(selected.split(" - ")[0]);
 
         try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT * FROM insurance WHERE insurance_id=?";
+            String sql = "SELECT * FROM damages WHERE damage_id=?";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, insuranceId);
+            pst.setInt(1, damageId);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
+                // Find and select rental
+                int rentalId = rs.getInt("rental_id");
+                for (int i = 0; i < cmbRentalId.getItemCount(); i++) {
+                    if (cmbRentalId.getItemAt(i).equals(String.valueOf(rentalId))) {
+                        cmbRentalId.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
                 // Find and select car
                 int carId = rs.getInt("car_id");
                 for (int i = 0; i < cmbCarId.getItemCount(); i++) {
@@ -332,101 +347,97 @@ public class InsuranceMgt extends javax.swing.JFrame {
                     }
                 }
 
-                txtPolicyNumber.setText(rs.getString("policy_number"));
-                txtInsuranceCompany.setText(rs.getString("insurance_company"));
+                txtDescription.setText(rs.getString("description"));
                 
-                double coverage = rs.getDouble("coverage_amount");
+                double repairCost = rs.getDouble("repair_cost");
                 if (!rs.wasNull()) {
-                    txtCoverageAmount.setText(String.valueOf(coverage));
+                    txtRepairCost.setText(String.valueOf(repairCost));
                 } else {
-                    txtCoverageAmount.setText("");
+                    txtRepairCost.setText("");
                 }
                 
-                txtPremiumAmount.setText(String.valueOf(rs.getDouble("premium_amount")));
-                dateStart.setDate(rs.getDate("start_date"));
-                dateEnd.setDate(rs.getDate("end_date"));
+                dateReported.setDate(rs.getDate("reported_date"));
                 cmbStatus.setSelectedItem(rs.getString("status"));
             } else {
-                JOptionPane.showMessageDialog(this, "Insurance not found!");
+                JOptionPane.showMessageDialog(this, "Damage record not found!");
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error finding insurance: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error finding damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnFindActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        String selected = cmbInsuranceId.getSelectedItem().toString();
-        if (selected.equals("Select Insurance")) {
-            JOptionPane.showMessageDialog(this, "Please select an insurance!");
+        String selected = cmbDamageId.getSelectedItem().toString();
+        if (selected.equals("Select Damage")) {
+            JOptionPane.showMessageDialog(this, "Please select a damage record!");
             return;
         }
 
+        String selectedRental = cmbRentalId.getSelectedItem().toString();
         String selectedCar = cmbCarId.getSelectedItem().toString();
 
-        if (selectedCar.equals("Select Car") || txtPolicyNumber.getText().isEmpty() || 
-            txtInsuranceCompany.getText().isEmpty() || txtPremiumAmount.getText().isEmpty() ||
-            dateStart.getDate() == null || dateEnd.getDate() == null) {
+        if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car") || 
+            txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
             JOptionPane.showMessageDialog(this, "Please fill all required fields!");
             return;
         }
 
-        int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
+        int damageId = Integer.parseInt(selected.split(" - ")[0]);
+        int rentalId = Integer.parseInt(selectedRental);
         int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
 
         try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE insurance SET car_id=?, policy_number=?, insurance_company=?, coverage_amount=?, premium_amount=?, start_date=?, end_date=?, status=? WHERE insurance_id=?";
+            String sql = "UPDATE damages SET rental_id=?, car_id=?, description=?, repair_cost=?, reported_date=?, status=? WHERE damage_id=?";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setString(2, txtPolicyNumber.getText());
-            pst.setString(3, txtInsuranceCompany.getText());
+            pst.setInt(1, rentalId);
+            pst.setInt(2, carId);
+            pst.setString(3, txtDescription.getText());
             
-            if (txtCoverageAmount.getText().isEmpty()) {
+            if (txtRepairCost.getText().isEmpty()) {
                 pst.setNull(4, java.sql.Types.DECIMAL);
             } else {
-                pst.setDouble(4, Double.parseDouble(txtCoverageAmount.getText()));
+                pst.setDouble(4, Double.parseDouble(txtRepairCost.getText()));
             }
             
-            pst.setDouble(5, Double.parseDouble(txtPremiumAmount.getText()));
-            pst.setDate(6, new java.sql.Date(dateStart.getDate().getTime()));
-            pst.setDate(7, new java.sql.Date(dateEnd.getDate().getTime()));
-            pst.setString(8, cmbStatus.getSelectedItem().toString());
-            pst.setInt(9, insuranceId);
+            pst.setDate(5, new java.sql.Date(dateReported.getDate().getTime()));
+            pst.setString(6, cmbStatus.getSelectedItem().toString());
+            pst.setInt(7, damageId);
 
             pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Insurance Updated Successfully!");
-            loadInsuranceIds();
+            JOptionPane.showMessageDialog(this, "Damage Record Updated Successfully!");
+            loadDamageIds();
             clearFields();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error updating insurance: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error updating damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        String selected = cmbInsuranceId.getSelectedItem().toString();
-        if (selected.equals("Select Insurance")) {
-            JOptionPane.showMessageDialog(this, "Please select an insurance!");
+        String selected = cmbDamageId.getSelectedItem().toString();
+        if (selected.equals("Select Damage")) {
+            JOptionPane.showMessageDialog(this, "Please select a damage record!");
             return;
         }
 
-        int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
+        int damageId = Integer.parseInt(selected.split(" - ")[0]);
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this insurance?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this damage record?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
 
         try (Connection conn = DbConnection.getConnection()) {
-            String sql = "DELETE FROM insurance WHERE insurance_id=?";
+            String sql = "DELETE FROM damages WHERE damage_id=?";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, insuranceId);
+            pst.setInt(1, damageId);
             pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Insurance Deleted Successfully!");
-            loadInsuranceIds();
+            JOptionPane.showMessageDialog(this, "Damage Record Deleted Successfully!");
+            loadDamageIds();
             clearFields();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error deleting insurance: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error deleting damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
@@ -440,14 +451,12 @@ public class InsuranceMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void clearFields() {
-        cmbInsuranceId.setSelectedIndex(0);
+        cmbDamageId.setSelectedIndex(0);
+        cmbRentalId.setSelectedIndex(0);
         cmbCarId.setSelectedIndex(0);
-        txtPolicyNumber.setText("");
-        txtInsuranceCompany.setText("");
-        txtCoverageAmount.setText("");
-        txtPremiumAmount.setText("");
-        dateStart.setDate(null);
-        dateEnd.setDate(null);
+        txtDescription.setText("");
+        txtRepairCost.setText("");
+        dateReported.setDate(null);
         cmbStatus.setSelectedIndex(0);
     }
 
@@ -468,13 +477,13 @@ public class InsuranceMgt extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(InsuranceMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(DamagesMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(InsuranceMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(DamagesMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(InsuranceMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(DamagesMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(InsuranceMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(DamagesMgt.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         //</editor-fold>
@@ -482,7 +491,7 @@ public class InsuranceMgt extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new InsuranceMgt().setVisible(true);
+                new DamagesMgt().setVisible(true);
             }
         });
     }
@@ -495,22 +504,19 @@ public class InsuranceMgt extends javax.swing.JFrame {
     private javax.swing.JButton btnFind;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JComboBox<String> cmbCarId;
-    private javax.swing.JComboBox<String> cmbInsuranceId;
+    private javax.swing.JComboBox<String> cmbDamageId;
+    private javax.swing.JComboBox<String> cmbRentalId;
     private javax.swing.JComboBox<String> cmbStatus;
-    private com.toedter.calendar.JDateChooser dateEnd;
-    private com.toedter.calendar.JDateChooser dateStart;
+    private com.toedter.calendar.JDateChooser dateReported;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCarId;
-    private javax.swing.JLabel lblCoverageAmount;
-    private javax.swing.JLabel lblEndDate;
-    private javax.swing.JLabel lblInsuranceCompany;
-    private javax.swing.JLabel lblInsuranceId;
-    private javax.swing.JLabel lblPolicyNumber;
-    private javax.swing.JLabel lblPremiumAmount;
-    private javax.swing.JLabel lblStartDate;
+    private javax.swing.JLabel lblDamageId;
+    private javax.swing.JLabel lblDescription;
+    private javax.swing.JLabel lblRentalId;
+    private javax.swing.JLabel lblRepairCost;
+    private javax.swing.JLabel lblReportedDate;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JTextField txtCoverageAmount;
-    private javax.swing.JTextField txtInsuranceCompany;
-    private javax.swing.JTextField txtPolicyNumber;
-    private javax.swing.JTextField txtPremiumAmount;
+    private javax.swing.JTextArea txtDescription;
+    private javax.swing.JTextField txtRepairCost;
     // End of variables declaration//GEN-END:variables
 }

@@ -3,7 +3,7 @@
  * Client Handler
  * Handles individual client requests in separate threads
  */
-package carrental.server.client;
+package carrental.server;
 
 import java.io.*;
 import java.net.*;

@@ -3,7 +3,7 @@
  * Car Rental Server
  * Main server class that listens for client connections
  */
-package carrental.server.client;
+package carrental.server;
 
 import java.io.*;
 import java.net.*;

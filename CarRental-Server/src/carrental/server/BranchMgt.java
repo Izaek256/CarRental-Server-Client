@@ -1,7 +1,7 @@
 /*
  * Branch Management Form
  */
-package carrental.server.client;
+package carrental.server;
 
 import java.sql.*;
 import javax.swing.*;

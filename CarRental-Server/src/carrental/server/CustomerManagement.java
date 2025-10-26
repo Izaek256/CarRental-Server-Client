@@ -1,4 +1,4 @@
-package carrental.server.client;
+package carrental.server;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
