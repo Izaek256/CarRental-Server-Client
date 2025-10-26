@@ -1,0 +1,21 @@
+# Build files
+build/
+dist/
+nbproject/private/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+.DS_Store
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
