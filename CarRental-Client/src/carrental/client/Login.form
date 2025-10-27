@@ -23,46 +23,56 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="65" max="-2" attributes="0"/>
+          <Group type="102" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="Btnlogin" min="-2" pref="121" max="-2" attributes="0"/>
-                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="Lblpass" alignment="0" pref="107" max="32767" attributes="0"/>
-                      <Component id="LblEmail" alignment="0" max="32767" attributes="0"/>
-                  </Group>
-              </Group>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
-                      <Component id="BtnSignup" min="-2" pref="112" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="58" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <EmptySpace min="-2" pref="65" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="Txtpass" min="-2" pref="182" max="-2" attributes="0"/>
-                          <Component id="txtEmailField" min="-2" pref="182" max="-2" attributes="0"/>
+                          <Component id="Btnlogin" min="-2" pref="121" max="-2" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="Lblpass" alignment="0" pref="107" max="32767" attributes="0"/>
+                              <Component id="LblEmail" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="114" max="-2" attributes="0"/>
+                              <Component id="BtnSignup" min="-2" pref="112" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="112" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="Txtpass" min="-2" pref="182" max="-2" attributes="0"/>
+                                  <Component id="txtEmailField" min="-2" pref="182" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
                   </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
-              <EmptySpace pref="81" max="32767" attributes="0"/>
+              <EmptySpace pref="41" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="LblEmail" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtEmailField" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
+              <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="Lblpass" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="Txtpass" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtEmailField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="LblEmail" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="95" max="32767" attributes="0"/>
+              <EmptySpace pref="33" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="Lblpass" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="Txtpass" alignment="1" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="Btnlogin" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="BtnSignup" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -105,6 +115,17 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="BtnSignupActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="ff" red="cc" type="rgb"/>
+        </Property>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Tahoma" size="24" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="SIGN IN PLEASE || SIGN UP IF YOU HAVE NO ACCOUNT "/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

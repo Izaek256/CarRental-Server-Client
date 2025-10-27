@@ -52,7 +52,10 @@ public class Dashboard extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
         menuPayments = new javax.swing.JMenuItem();
         menuMaintenance = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
+        menuInsurance = new javax.swing.JMenuItem();
+        menuDamagesMgt = new javax.swing.JCheckBoxMenuItem();
+        menuEmpAssign = new javax.swing.JCheckBoxMenuItem();
+        menuBranch = new javax.swing.JCheckBoxMenuItem();
         jMenu9 = new javax.swing.JMenu();
         customerReport = new javax.swing.JMenuItem();
         carReport = new javax.swing.JMenuItem();
@@ -89,7 +92,7 @@ public class Dashboard extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(127, 134, 103));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/proj1/Rent-A-Car-Banner-22.jpg"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/carrental/client/Rent-A-Car-Banner-22.jpg"))); // NOI18N
 
         menuManageCars.setText("System");
 
@@ -133,8 +136,40 @@ public class Dashboard extends javax.swing.JFrame {
         });
         menuManageCars.add(menuMaintenance);
 
-        jMenuItem6.setText("jMenuItem6");
-        menuManageCars.add(jMenuItem6);
+        menuInsurance.setText("Insurance Management");
+        menuInsurance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuInsuranceActionPerformed(evt);
+            }
+        });
+        menuManageCars.add(menuInsurance);
+
+        menuDamagesMgt.setSelected(true);
+        menuDamagesMgt.setText("Rental Damages");
+        menuDamagesMgt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuDamagesMgtActionPerformed(evt);
+            }
+        });
+        menuManageCars.add(menuDamagesMgt);
+
+        menuEmpAssign.setSelected(true);
+        menuEmpAssign.setText("Employee Assignment");
+        menuEmpAssign.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuEmpAssignActionPerformed(evt);
+            }
+        });
+        menuManageCars.add(menuEmpAssign);
+
+        menuBranch.setSelected(true);
+        menuBranch.setText("Branch Management");
+        menuBranch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuBranchActionPerformed(evt);
+            }
+        });
+        menuManageCars.add(menuBranch);
 
         jMenuBar6.add(menuManageCars);
 
@@ -201,13 +236,13 @@ public class Dashboard extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1322, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1275, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 624, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 650, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -277,6 +312,27 @@ public class Dashboard extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_menuExitActionPerformed
 
+    private void menuInsuranceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuInsuranceActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new InsuranceMgt().setVisible(true);
+    }//GEN-LAST:event_menuInsuranceActionPerformed
+
+    private void menuEmpAssignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEmpAssignActionPerformed
+        this.dispose();
+        new EmployeeAssignmentMgt().setVisible(true);
+    }//GEN-LAST:event_menuEmpAssignActionPerformed
+
+    private void menuBranchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBranchActionPerformed
+        this.dispose();
+        new BranchMgt().setVisible(true);
+    }//GEN-LAST:event_menuBranchActionPerformed
+
+    private void menuDamagesMgtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDamagesMgtActionPerformed
+       this.dispose();
+        new DamagesMgt().setVisible(true);
+    }//GEN-LAST:event_menuDamagesMgtActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -334,12 +390,15 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar5;
     private javax.swing.JMenuBar jMenuBar6;
     private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem maintenanceReport;
+    private javax.swing.JCheckBoxMenuItem menuBranch;
     private javax.swing.JMenuItem menuCars;
     private javax.swing.JMenuItem menuCustomers;
+    private javax.swing.JCheckBoxMenuItem menuDamagesMgt;
+    private javax.swing.JCheckBoxMenuItem menuEmpAssign;
     private javax.swing.JMenuItem menuExit;
     private javax.swing.JMenu menuFile;
+    private javax.swing.JMenuItem menuInsurance;
     private javax.swing.JMenuItem menuMaintenance;
     private javax.swing.JMenu menuManageCars;
     private javax.swing.JMenuItem menuPayments;

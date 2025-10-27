@@ -3,7 +3,6 @@
  */
 package carrental.client;
 
-import java.sql.*;
 import javax.swing.*;
 
 /**
@@ -22,43 +21,42 @@ public class BranchMgt extends javax.swing.JFrame {
     }
 
     private void loadBranchIds() {
-        cmbBranchId.removeAllItems();
-        cmbBranchId.addItem("Select Branch");
+        try {
+            cmbBranchId.removeAllItems();
+            cmbBranchId.addItem("Select Branch");
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT branch_id, branch_name FROM branches ORDER BY branch_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+            String response = ServerConnection.getInstance().sendRequest("LIST|Branches|");
+            String[] parts = response.split("\\|", 2);
 
-            while (rs.next()) {
-                int branchId = rs.getInt("branch_id");
-                String name = rs.getString("branch_name");
-                cmbBranchId.addItem(branchId + " - " + name);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] branches = parts[1].split(";");
+                for (String branch : branches) {
+                    cmbBranchId.addItem(branch);
+                }
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading branch IDs: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     private void loadManagerIds() {
-        cmbManagerId.removeAllItems();
-        cmbManagerId.addItem("Select Manager");
+        try {
+            cmbManagerId.removeAllItems();
+            cmbManagerId.addItem("Select Manager");
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT employee_id,first_name, last_name FROM employees_login ORDER BY employee_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+            String response = ServerConnection.getInstance().sendRequest("LIST|Employees|");
+            String[] parts = response.split("\\|", 2);
 
-            while (rs.next()) {
-                int empId = rs.getInt("employee_id");
-                String firstname = rs.getString("first_name");
-                String lastname = rs.getString("last_name");
-                cmbManagerId.addItem(empId + " - " + firstname+ " - " + lastname);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] employees = parts[1].split(";");
+                for (String employee : employees) {
+                    cmbManagerId.addItem(employee);
+                }
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading manager IDs: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -100,11 +98,11 @@ public class BranchMgt extends javax.swing.JFrame {
         lblManagerId.setText("Manager");
         lblStatus.setText("Status");
 
-        cmbBranchId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Branch" }));
+        cmbBranchId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Select Branch"}));
 
-        cmbManagerId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Manager" }));
+        cmbManagerId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Select Manager"}));
 
-        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Active", "Inactive" }));
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Active", "Inactive"}));
 
         btnAdd.setText("Add");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -151,245 +149,288 @@ public class BranchMgt extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(110, 110, 110)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lblBranchId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblBranchName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblCity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblPhone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblManagerId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(40, 40, 40)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cmbBranchId, 0, 250, Short.MAX_VALUE)
-                            .addComponent(txtBranchName)
-                            .addComponent(txtAddress)
-                            .addComponent(txtCity)
-                            .addComponent(txtPhone)
-                            .addComponent(txtEmail)
-                            .addComponent(cmbManagerId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cmbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(11, 11, 11)
-                        .addComponent(btnAdd)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnUpdate)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnDelete)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnClear)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnFind)))
-                .addContainerGap(130, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnBack)
-                .addGap(320, 320, 320))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(110, 110, 110)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(lblBranchId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblBranchName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblCity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblPhone, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblEmail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblManagerId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addGap(40, 40, 40)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(cmbBranchId, 0, 250, Short.MAX_VALUE)
+                                                        .addComponent(txtBranchName)
+                                                        .addComponent(txtAddress)
+                                                        .addComponent(txtCity)
+                                                        .addComponent(txtPhone)
+                                                        .addComponent(txtEmail)
+                                                        .addComponent(cmbManagerId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(cmbStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(11, 11, 11)
+                                                .addComponent(btnAdd)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnUpdate)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnDelete)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnClear)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(btnFind)))
+                                .addContainerGap(130, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnBack)
+                                .addGap(320, 320, 320))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblBranchId)
-                    .addComponent(cmbBranchId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblBranchName)
-                    .addComponent(txtBranchName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblAddress)
-                    .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblCity)
-                    .addComponent(txtCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPhone)
-                    .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblEmail)
-                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblManagerId)
-                    .addComponent(cmbManagerId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStatus)
-                    .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(35, 35, 35)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAdd)
-                    .addComponent(btnUpdate)
-                    .addComponent(btnDelete)
-                    .addComponent(btnClear)
-                    .addComponent(btnFind))
-                .addGap(18, 18, 18)
-                .addComponent(btnBack)
-                .addContainerGap(40, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblBranchId)
+                                        .addComponent(cmbBranchId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblBranchName)
+                                        .addComponent(txtBranchName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblAddress)
+                                        .addComponent(txtAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblCity)
+                                        .addComponent(txtCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblPhone)
+                                        .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblEmail)
+                                        .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblManagerId)
+                                        .addComponent(cmbManagerId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(25, 25, 25)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lblStatus)
+                                        .addComponent(cmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(35, 35, 35)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnAdd)
+                                        .addComponent(btnUpdate)
+                                        .addComponent(btnDelete)
+                                        .addComponent(btnClear)
+                                        .addComponent(btnFind))
+                                .addGap(18, 18, 18)
+                                .addComponent(btnBack)
+                                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
-        if (txtBranchName.getText().isEmpty() || txtAddress.getText().isEmpty() || 
-            txtCity.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all required fields!");
-            return;
-        }
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO branches(branch_name, address, city, phone_number, email, manager_id, status) VALUES (?,?,?,?,?,?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtBranchName.getText());
-            pst.setString(2, txtAddress.getText());
-            pst.setString(3, txtCity.getText());
-            pst.setString(4, txtPhone.getText().isEmpty() ? null : txtPhone.getText());
-            pst.setString(5, txtEmail.getText().isEmpty() ? null : txtEmail.getText());
-            
-            String selectedManager = cmbManagerId.getSelectedItem().toString();
-            if (selectedManager.equals("Select Manager")) {
-                pst.setNull(6, java.sql.Types.INTEGER);
-            } else {
-                pst.setInt(6, Integer.parseInt(selectedManager.split(" - ")[0]));
+        try {
+            if (txtBranchName.getText().isEmpty() || txtAddress.getText().isEmpty()
+                    || txtCity.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
             }
-            
-            pst.setString(7, cmbStatus.getSelectedItem().toString());
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Branch Added Successfully!");
-            loadBranchIds();
-            clearFields();
+            String selectedManager = cmbManagerId.getSelectedItem().toString();
+            String managerId = "";
+
+            if (!selectedManager.equals("Select Manager")) {
+                managerId = selectedManager.split(" - ")[0];
+            }
+
+            // Data format: branch_name,address,city,phone_number,email,manager_id,status
+            String branchData = txtBranchName.getText() + ","
+                    + txtAddress.getText() + ","
+                    + txtCity.getText() + ","
+                    + txtPhone.getText().trim() + ","
+                    + txtEmail.getText().trim() + ","
+                    + managerId + ","
+                    + cmbStatus.getSelectedItem().toString();
+
+            String response = ServerConnection.getInstance().sendRequest("ADD|Branches|" + branchData);
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
+                loadBranchIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding branch: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {
-        String selected = cmbBranchId.getSelectedItem().toString();
-        if (selected.equals("Select Branch")) {
-            JOptionPane.showMessageDialog(this, "Please select a branch!");
-            return;
-        }
+        try {
+            String selected = cmbBranchId.getSelectedItem().toString();
+            if (selected.equals("Select Branch")) {
+                JOptionPane.showMessageDialog(this, "Please select a branch!");
+                return;
+            }
 
-        int branchId = Integer.parseInt(selected.split(" - ")[0]);
+            // Extract branch_id from "5 - Branch Name"
+            int branchId = Integer.parseInt(selected.split(" - ")[0]);
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT * FROM branches WHERE branch_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, branchId);
-            ResultSet rs = pst.executeQuery();
+            // Send FIND request
+            String response = ServerConnection.getInstance().sendRequest("FIND|Branches|" + branchId);
+            System.out.println("Server response: " + response); // Debug
 
-            if (rs.next()) {
-                txtBranchName.setText(rs.getString("branch_name"));
-                txtAddress.setText(rs.getString("address"));
-                txtCity.setText(rs.getString("city"));
-                txtPhone.setText(rs.getString("phone_number"));
-                txtEmail.setText(rs.getString("email"));
-                
-                // Find and select manager
-                int managerId = rs.getInt("manager_id");
-                if (!rs.wasNull()) {
-                    for (int i = 0; i < cmbManagerId.getItemCount(); i++) {
-                        if (cmbManagerId.getItemAt(i).startsWith(managerId + " - ")) {
-                            cmbManagerId.setSelectedIndex(i);
-                            break;
-                        }
-                    }
-                } else {
-                    cmbManagerId.setSelectedIndex(0);
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS")) {
+                /*
+                Server returns: "SUCCESS|branch_name,address,city,phone_number,email,manager_id,status"
+                Example: "SUCCESS|Downtown,123 Main St,New York,555-1234,info@branch.com,5,Active"
+                 */
+                String[] fields = parts[1].split(",");
+
+                System.out.println("Number of fields: " + fields.length); // Debug
+                for (int i = 0; i < fields.length; i++) {
+                    System.out.println("Field " + i + ": " + fields[i]); // Debug
                 }
-                
-                cmbStatus.setSelectedItem(rs.getString("status"));
+
+                if (fields.length >= 7) {
+                    // Set text fields
+                    txtBranchName.setText(fields[0]);
+                    txtAddress.setText(fields[1]);
+                    txtCity.setText(fields[2]);
+                    txtPhone.setText(fields[3]);
+                    txtEmail.setText(fields[4]);
+
+                    // Find and select manager ID (may be empty for NULL)
+                    if (!fields[5].isEmpty()) {
+                        int managerId = Integer.parseInt(fields[5]);
+                        for (int i = 0; i < cmbManagerId.getItemCount(); i++) {
+                            String item = cmbManagerId.getItemAt(i);
+                            if (item.startsWith(managerId + " - ")) {
+                                cmbManagerId.setSelectedIndex(i);
+                                break;
+                            }
+                        }
+                    } else {
+                        cmbManagerId.setSelectedIndex(0); // Select "Select Manager"
+                    }
+
+                    // Set status
+                    cmbStatus.setSelectedItem(fields[6]);
+
+                    JOptionPane.showMessageDialog(this, "Record found!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Incomplete data received! Expected 7 fields, got " + fields.length);
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Branch not found!");
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error finding branch: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {
-        String selected = cmbBranchId.getSelectedItem().toString();
-        if (selected.equals("Select Branch")) {
-            JOptionPane.showMessageDialog(this, "Please select a branch!");
-            return;
-        }
-
-        if (txtBranchName.getText().isEmpty() || txtAddress.getText().isEmpty() || 
-            txtCity.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all required fields!");
-            return;
-        }
-
-        int branchId = Integer.parseInt(selected.split(" - ")[0]);
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE branches SET branch_name=?, address=?, city=?, phone_number=?, email=?, manager_id=?, status=? WHERE branch_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtBranchName.getText());
-            pst.setString(2, txtAddress.getText());
-            pst.setString(3, txtCity.getText());
-            pst.setString(4, txtPhone.getText().isEmpty() ? null : txtPhone.getText());
-            pst.setString(5, txtEmail.getText().isEmpty() ? null : txtEmail.getText());
-            
-            String selectedManager = cmbManagerId.getSelectedItem().toString();
-            if (selectedManager.equals("Select Manager")) {
-                pst.setNull(6, java.sql.Types.INTEGER);
-            } else {
-                pst.setInt(6, Integer.parseInt(selectedManager.split(" - ")[0]));
+        try {
+            String selected = cmbBranchId.getSelectedItem().toString();
+            if (selected.equals("Select Branch")) {
+                JOptionPane.showMessageDialog(this, "Please select a branch!");
+                return;
             }
-            
-            pst.setString(7, cmbStatus.getSelectedItem().toString());
-            pst.setInt(8, branchId);
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Branch Updated Successfully!");
-            loadBranchIds();
-            clearFields();
+            if (txtBranchName.getText().isEmpty() || txtAddress.getText().isEmpty()
+                    || txtCity.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
+            }
+
+            int branchId = Integer.parseInt(selected.split(" - ")[0]);
+
+            String selectedManager = cmbManagerId.getSelectedItem().toString();
+            String managerId = "";
+
+            if (!selectedManager.equals("Select Manager")) {
+                managerId = selectedManager.split(" - ")[0];
+            }
+
+            // Data format: branch_id,branch_name,address,city,phone_number,email,manager_id,status
+            String branchData = branchId + ","
+                    + txtBranchName.getText() + ","
+                    + txtAddress.getText() + ","
+                    + txtCity.getText() + ","
+                    + txtPhone.getText().trim() + ","
+                    + txtEmail.getText().trim() + ","
+                    + managerId + ","
+                    + cmbStatus.getSelectedItem().toString();
+
+            String response = ServerConnection.getInstance().sendRequest("UPDATE|Branches|" + branchData);
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
+                loadBranchIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating branch: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {
-        String selected = cmbBranchId.getSelectedItem().toString();
-        if (selected.equals("Select Branch")) {
-            JOptionPane.showMessageDialog(this, "Please select a branch!");
-            return;
-        }
+        try {
+            String selected = cmbBranchId.getSelectedItem().toString();
+            if (selected.equals("Select Branch")) {
+                JOptionPane.showMessageDialog(this, "Please select a branch!");
+                return;
+            }
 
-        int branchId = Integer.parseInt(selected.split(" - ")[0]);
+            int branchId = Integer.parseInt(selected.split(" - ")[0]);
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this branch?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this branch?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "DELETE FROM branches WHERE branch_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, branchId);
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Branch Deleted Successfully!");
-            loadBranchIds();
-            clearFields();
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            String response = ServerConnection.getInstance().sendRequest("DELETE|Branches|" + branchId);
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
+                loadBranchIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
+            }
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting branch: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
