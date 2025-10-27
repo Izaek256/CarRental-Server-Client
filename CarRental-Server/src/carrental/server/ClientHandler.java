@@ -1,7 +1,8 @@
-
 /*
- * Client Handler
+ * Client Handler - COMPLETE VERSION
  * Handles individual client requests in separate threads
+ * Supports ALL tables: Cars, Branches, Insurance, Damages, EmployeeAssignments,
+ * VehicleMaintenance, Rentals, Payments, Customers, Employees
  */
 package carrental.server;
 
@@ -9,15 +10,16 @@ import java.io.*;
 import java.net.*;
 import java.sql.*;
 
+
 /**
  *
  * @author Izaek Kisuule
  */
 public class ClientHandler extends Thread {
-    private Socket socket;
+    private final Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
-    private int clientId;
+    private final int clientId;
     
     public ClientHandler(Socket socket, int clientId) {
         this.socket = socket;
@@ -54,7 +56,6 @@ public class ClientHandler extends Thread {
                 if (socket != null) socket.close();
                 System.out.println("Client #" + clientId + " disconnected");
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -95,9 +96,8 @@ public class ClientHandler extends Thread {
         }
     }
     
-    /**
-     * Handle ADD requests
-     */
+    // ==================== ADD OPERATIONS ====================
+    
     private String handleAdd(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             String[] fields = data.split(",");
@@ -113,6 +113,16 @@ public class ClientHandler extends Thread {
                     return addDamage(conn, fields);
                 case "EmployeeAssignments":
                     return addAssignment(conn, fields);
+                case "VehicleMaintenance":
+                    return addMaintenance(conn, fields);
+                case "Rentals":
+                    return addRental(conn, fields);
+                case "Payments":
+                    return addPayment(conn, fields);
+                case "Customers":
+                    return addCustomer(conn, fields);
+                case "Employees":
+                    return addEmployee(conn, fields);
                 default:
                     return "ERROR|Unknown table: " + table;
             }
@@ -125,14 +135,14 @@ public class ClientHandler extends Thread {
     private String addCar(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO Cars(make, model, year, license_plate, rental_rate, status, color, mileage) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setString(1, fields[0]); // make
-        pst.setString(2, fields[1]); // model
-        pst.setInt(3, Integer.parseInt(fields[2])); // year
-        pst.setString(4, fields[3]); // plate
-        pst.setDouble(5, Double.parseDouble(fields[4])); // rate
-        pst.setString(6, fields[5]); // status
-        pst.setString(7, fields[6]); // color
-        pst.setInt(8, Integer.parseInt(fields[7])); // mileage
+        pst.setString(1, fields[0]);
+        pst.setString(2, fields[1]);
+        pst.setInt(3, Integer.parseInt(fields[2]));
+        pst.setString(4, fields[3]);
+        pst.setDouble(5, Double.parseDouble(fields[4]));
+        pst.setString(6, fields[5]);
+        pst.setString(7, fields[6]);
+        pst.setInt(8, Integer.parseInt(fields[7]));
         pst.executeUpdate();
         return "SUCCESS|Car added successfully";
     }
@@ -140,17 +150,17 @@ public class ClientHandler extends Thread {
     private String addBranch(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO branches(branch_name, address, city, phone_number, email, manager_id, status) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setString(1, fields[0]); // branch_name
-        pst.setString(2, fields[1]); // address
-        pst.setString(3, fields[2]); // city
-        pst.setString(4, fields[3].isEmpty() ? null : fields[3]); // phone
-        pst.setString(5, fields[4].isEmpty() ? null : fields[4]); // email
+        pst.setString(1, fields[0]);
+        pst.setString(2, fields[1]);
+        pst.setString(3, fields[2]);
+        pst.setString(4, fields[3].isEmpty() ? null : fields[3]);
+        pst.setString(5, fields[4].isEmpty() ? null : fields[4]);
         if (fields[5].isEmpty()) {
             pst.setNull(6, java.sql.Types.INTEGER);
         } else {
-            pst.setInt(6, Integer.parseInt(fields[5])); // manager_id
+            pst.setInt(6, Integer.parseInt(fields[5]));
         }
-        pst.setString(7, fields[6]); // status
+        pst.setString(7, fields[6]);
         pst.executeUpdate();
         return "SUCCESS|Branch added successfully";
     }
@@ -158,18 +168,18 @@ public class ClientHandler extends Thread {
     private String addInsurance(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO insurance(car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[0])); // car_id
-        pst.setString(2, fields[1]); // policy_number
-        pst.setString(3, fields[2]); // insurance_company
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setString(2, fields[1]);
+        pst.setString(3, fields[2]);
         if (fields[3].isEmpty()) {
             pst.setNull(4, java.sql.Types.DECIMAL);
         } else {
-            pst.setDouble(4, Double.parseDouble(fields[3])); // coverage_amount
+            pst.setDouble(4, Double.parseDouble(fields[3]));
         }
-        pst.setDouble(5, Double.parseDouble(fields[4])); // premium_amount
-        pst.setDate(6, java.sql.Date.valueOf(fields[5])); // start_date
-        pst.setDate(7, java.sql.Date.valueOf(fields[6])); // end_date
-        pst.setString(8, fields[7]); // status
+        pst.setDouble(5, Double.parseDouble(fields[4]));
+        pst.setDate(6, java.sql.Date.valueOf(fields[5]));
+        pst.setDate(7, java.sql.Date.valueOf(fields[6]));
+        pst.setString(8, fields[7]);
         pst.executeUpdate();
         return "SUCCESS|Insurance added successfully";
     }
@@ -177,16 +187,16 @@ public class ClientHandler extends Thread {
     private String addDamage(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO damages(rental_id, car_id, description, repair_cost, reported_date, status) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[0])); // rental_id
-        pst.setInt(2, Integer.parseInt(fields[1])); // car_id
-        pst.setString(3, fields[2]); // description
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setInt(2, Integer.parseInt(fields[1]));
+        pst.setString(3, fields[2]);
         if (fields[3].isEmpty()) {
             pst.setNull(4, java.sql.Types.DECIMAL);
         } else {
-            pst.setDouble(4, Double.parseDouble(fields[3])); // repair_cost
+            pst.setDouble(4, Double.parseDouble(fields[3]));
         }
-        pst.setDate(5, java.sql.Date.valueOf(fields[4])); // reported_date
-        pst.setString(6, fields[5]); // status
+        pst.setDate(5, java.sql.Date.valueOf(fields[4]));
+        pst.setString(6, fields[5]);
         pst.executeUpdate();
         return "SUCCESS|Damage record added successfully";
     }
@@ -194,19 +204,81 @@ public class ClientHandler extends Thread {
     private String addAssignment(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO employeeassignments(employee_id, branch_id, assignment_type, assignment_date, description, status) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[0])); // employee_id
-        pst.setInt(2, Integer.parseInt(fields[1])); // branch_id
-        pst.setString(3, fields[2]); // assignment_type
-        pst.setDate(4, java.sql.Date.valueOf(fields[3])); // assignment_date
-        pst.setString(5, fields[4]); // description
-        pst.setString(6, fields[5]); // status
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setInt(2, Integer.parseInt(fields[1]));
+        pst.setString(3, fields[2]);
+        pst.setDate(4, java.sql.Date.valueOf(fields[3]));
+        pst.setString(5, fields[4]);
+        pst.setString(6, fields[5]);
         pst.executeUpdate();
         return "SUCCESS|Assignment added successfully";
     }
     
-    /**
-     * Handle UPDATE requests
-     */
+    private String addMaintenance(Connection conn, String[] fields) throws SQLException {
+        String sql = "INSERT INTO vehiclemaintenance(car_id, service_date, description, cost) VALUES (?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setDate(2, java.sql.Date.valueOf(fields[1]));
+        pst.setString(3, fields[2]);
+        pst.setDouble(4, Double.parseDouble(fields[3]));
+        pst.executeUpdate();
+        return "SUCCESS|Maintenance record added successfully";
+    }
+    
+    private String addRental(Connection conn, String[] fields) throws SQLException {
+        String sql = "INSERT INTO rentals(customer_id, car_id, employee_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setInt(2, Integer.parseInt(fields[1]));
+        pst.setInt(3, Integer.parseInt(fields[2]));
+        pst.setDate(4, java.sql.Date.valueOf(fields[3]));
+        pst.setDate(5, java.sql.Date.valueOf(fields[4]));
+        pst.setDouble(6, Double.parseDouble(fields[5]));
+        pst.setString(7, fields[6]);
+        pst.executeUpdate();
+        return "SUCCESS|Rental added successfully";
+    }
+    
+    private String addPayment(Connection conn, String[] fields) throws SQLException {
+        String sql = "INSERT INTO payments(rental_id, amount, payment_date, payment_method, payment_status) VALUES (?,?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[0]));
+        pst.setDouble(2, Double.parseDouble(fields[1]));
+        pst.setDate(3, java.sql.Date.valueOf(fields[2]));
+        pst.setString(4, fields[3]);
+        pst.setString(5, fields[4]);
+        pst.executeUpdate();
+        return "SUCCESS|Payment added successfully";
+    }
+    
+    private String addCustomer(Connection conn, String[] fields) throws SQLException {
+        String sql = "INSERT INTO customers(first_name, last_name, email, phone_number, address, license_number) VALUES (?,?,?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, fields[0]);
+        pst.setString(2, fields[1]);
+        pst.setString(3, fields[2]);
+        pst.setString(4, fields[3].isEmpty() ? null : fields[3]);
+        pst.setString(5, fields[4].isEmpty() ? null : fields[4]);
+        pst.setString(6, fields[5].isEmpty() ? null : fields[5]);
+        pst.executeUpdate();
+        return "SUCCESS|Customer added successfully";
+    }
+    
+    private String addEmployee(Connection conn, String[] fields) throws SQLException {
+        String sql = "INSERT INTO employees_login(first_name, last_name, email, phone_number, address, password_hash) VALUES (?,?,?,?,?,?)";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, fields[0]);
+        pst.setString(2, fields[1]);
+        pst.setString(3, fields[2]);
+        pst.setString(4, fields[3].isEmpty() ? null : fields[3]);
+        pst.setString(5, fields[4].isEmpty() ? null : fields[4]);
+        pst.setString(6, fields[5]); // password_hash
+        pst.executeUpdate();
+        return "SUCCESS|Employee added successfully";
+    }
+    
+    // ==================== UPDATE OPERATIONS ====================
+    
     private String handleUpdate(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             String[] fields = data.split(",");
@@ -222,6 +294,16 @@ public class ClientHandler extends Thread {
                     return updateDamage(conn, fields);
                 case "EmployeeAssignments":
                     return updateAssignment(conn, fields);
+                case "VehicleMaintenance":
+                    return updateMaintenance(conn, fields);
+                case "Rentals":
+                    return updateRental(conn, fields);
+                case "Payments":
+                    return updatePayment(conn, fields);
+                case "Customers":
+                    return updateCustomer(conn, fields);
+                case "Employees":
+                    return updateEmployee(conn, fields);
                 default:
                     return "ERROR|Unknown table: " + table;
             }
@@ -234,15 +316,15 @@ public class ClientHandler extends Thread {
     private String updateCar(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE Cars SET make=?, model=?, year=?, license_plate=?, rental_rate=?, status=?, color=?, mileage=? WHERE car_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setString(1, fields[1]); // make
-        pst.setString(2, fields[2]); // model
-        pst.setInt(3, Integer.parseInt(fields[3])); // year
-        pst.setString(4, fields[4]); // plate
-        pst.setDouble(5, Double.parseDouble(fields[5])); // rate
-        pst.setString(6, fields[6]); // status
-        pst.setString(7, fields[7]); // color
-        pst.setInt(8, Integer.parseInt(fields[8])); // mileage
-        pst.setInt(9, Integer.parseInt(fields[0])); // car_id
+        pst.setString(1, fields[1]);
+        pst.setString(2, fields[2]);
+        pst.setInt(3, Integer.parseInt(fields[3]));
+        pst.setString(4, fields[4]);
+        pst.setDouble(5, Double.parseDouble(fields[5]));
+        pst.setString(6, fields[6]);
+        pst.setString(7, fields[7]);
+        pst.setInt(8, Integer.parseInt(fields[8]));
+        pst.setInt(9, Integer.parseInt(fields[0]));
         pst.executeUpdate();
         return "SUCCESS|Car updated successfully";
     }
@@ -250,18 +332,18 @@ public class ClientHandler extends Thread {
     private String updateBranch(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE branches SET branch_name=?, address=?, city=?, phone_number=?, email=?, manager_id=?, status=? WHERE branch_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setString(1, fields[1]); // branch_name
-        pst.setString(2, fields[2]); // address
-        pst.setString(3, fields[3]); // city
-        pst.setString(4, fields[4].isEmpty() ? null : fields[4]); // phone
-        pst.setString(5, fields[5].isEmpty() ? null : fields[5]); // email
+        pst.setString(1, fields[1]);
+        pst.setString(2, fields[2]);
+        pst.setString(3, fields[3]);
+        pst.setString(4, fields[4].isEmpty() ? null : fields[4]);
+        pst.setString(5, fields[5].isEmpty() ? null : fields[5]);
         if (fields[6].isEmpty()) {
             pst.setNull(6, java.sql.Types.INTEGER);
         } else {
-            pst.setInt(6, Integer.parseInt(fields[6])); // manager_id
+            pst.setInt(6, Integer.parseInt(fields[6]));
         }
-        pst.setString(7, fields[7]); // status
-        pst.setInt(8, Integer.parseInt(fields[0])); // branch_id
+        pst.setString(7, fields[7]);
+        pst.setInt(8, Integer.parseInt(fields[0]));
         pst.executeUpdate();
         return "SUCCESS|Branch updated successfully";
     }
@@ -269,19 +351,19 @@ public class ClientHandler extends Thread {
     private String updateInsurance(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE insurance SET car_id=?, policy_number=?, insurance_company=?, coverage_amount=?, premium_amount=?, start_date=?, end_date=?, status=? WHERE insurance_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[1])); // car_id
-        pst.setString(2, fields[2]); // policy_number
-        pst.setString(3, fields[3]); // insurance_company
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setString(2, fields[2]);
+        pst.setString(3, fields[3]);
         if (fields[4].isEmpty()) {
             pst.setNull(4, java.sql.Types.DECIMAL);
         } else {
-            pst.setDouble(4, Double.parseDouble(fields[4])); // coverage_amount
+            pst.setDouble(4, Double.parseDouble(fields[4]));
         }
-        pst.setDouble(5, Double.parseDouble(fields[5])); // premium_amount
-        pst.setDate(6, java.sql.Date.valueOf(fields[6])); // start_date
-        pst.setDate(7, java.sql.Date.valueOf(fields[7])); // end_date
-        pst.setString(8, fields[8]); // status
-        pst.setInt(9, Integer.parseInt(fields[0])); // insurance_id
+        pst.setDouble(5, Double.parseDouble(fields[5]));
+        pst.setDate(6, java.sql.Date.valueOf(fields[6]));
+        pst.setDate(7, java.sql.Date.valueOf(fields[7]));
+        pst.setString(8, fields[8]);
+        pst.setInt(9, Integer.parseInt(fields[0]));
         pst.executeUpdate();
         return "SUCCESS|Insurance updated successfully";
     }
@@ -289,17 +371,17 @@ public class ClientHandler extends Thread {
     private String updateDamage(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE damages SET rental_id=?, car_id=?, description=?, repair_cost=?, reported_date=?, status=? WHERE damage_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[1])); // rental_id
-        pst.setInt(2, Integer.parseInt(fields[2])); // car_id
-        pst.setString(3, fields[3]); // description
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setInt(2, Integer.parseInt(fields[2]));
+        pst.setString(3, fields[3]);
         if (fields[4].isEmpty()) {
             pst.setNull(4, java.sql.Types.DECIMAL);
         } else {
-            pst.setDouble(4, Double.parseDouble(fields[4])); // repair_cost
+            pst.setDouble(4, Double.parseDouble(fields[4]));
         }
-        pst.setDate(5, java.sql.Date.valueOf(fields[5])); // reported_date
-        pst.setString(6, fields[6]); // status
-        pst.setInt(7, Integer.parseInt(fields[0])); // damage_id
+        pst.setDate(5, java.sql.Date.valueOf(fields[5]));
+        pst.setString(6, fields[6]);
+        pst.setInt(7, Integer.parseInt(fields[0]));
         pst.executeUpdate();
         return "SUCCESS|Damage updated successfully";
     }
@@ -307,20 +389,87 @@ public class ClientHandler extends Thread {
     private String updateAssignment(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE employeeassignments SET employee_id=?, branch_id=?, assignment_type=?, assignment_date=?, description=?, status=? WHERE assignment_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, Integer.parseInt(fields[1])); // employee_id
-        pst.setInt(2, Integer.parseInt(fields[2])); // branch_id
-        pst.setString(3, fields[3]); // assignment_type
-        pst.setDate(4, java.sql.Date.valueOf(fields[4])); // assignment_date
-        pst.setString(5, fields[5]); // description
-        pst.setString(6, fields[6]); // status
-        pst.setInt(7, Integer.parseInt(fields[0])); // assignment_id
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setInt(2, Integer.parseInt(fields[2]));
+        pst.setString(3, fields[3]);
+        pst.setDate(4, java.sql.Date.valueOf(fields[4]));
+        pst.setString(5, fields[5]);
+        pst.setString(6, fields[6]);
+        pst.setInt(7, Integer.parseInt(fields[0]));
         pst.executeUpdate();
         return "SUCCESS|Assignment updated successfully";
     }
     
-    /**
-     * Handle DELETE requests
-     */
+    private String updateMaintenance(Connection conn, String[] fields) throws SQLException {
+        String sql = "UPDATE vehiclemaintenance SET car_id=?, service_date=?, description=?, cost=? WHERE maintenance_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setDate(2, java.sql.Date.valueOf(fields[2]));
+        pst.setString(3, fields[3]);
+        pst.setDouble(4, Double.parseDouble(fields[4]));
+        pst.setInt(5, Integer.parseInt(fields[0]));
+        pst.executeUpdate();
+        return "SUCCESS|Maintenance updated successfully";
+    }
+    
+    private String updateRental(Connection conn, String[] fields) throws SQLException {
+        String sql = "UPDATE rentals SET customer_id=?, car_id=?, employee_id=?, start_date=?, end_date=?, total_amount=?, status=? WHERE rental_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setInt(2, Integer.parseInt(fields[2]));
+        pst.setInt(3, Integer.parseInt(fields[3]));
+        pst.setDate(4, java.sql.Date.valueOf(fields[4]));
+        pst.setDate(5, java.sql.Date.valueOf(fields[5]));
+        pst.setDouble(6, Double.parseDouble(fields[6]));
+        pst.setString(7, fields[7]);
+        pst.setInt(8, Integer.parseInt(fields[0]));
+        pst.executeUpdate();
+        return "SUCCESS|Rental updated successfully";
+    }
+    
+    private String updatePayment(Connection conn, String[] fields) throws SQLException {
+        String sql = "UPDATE payments SET rental_id=?, amount=?, payment_date=?, payment_method=?, payment_status=? WHERE payment_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, Integer.parseInt(fields[1]));
+        pst.setDouble(2, Double.parseDouble(fields[2]));
+        pst.setDate(3, java.sql.Date.valueOf(fields[3]));
+        pst.setString(4, fields[4]);
+        pst.setString(5, fields[5]);
+        pst.setInt(6, Integer.parseInt(fields[0]));
+        pst.executeUpdate();
+        return "SUCCESS|Payment updated successfully";
+    }
+    
+    private String updateCustomer(Connection conn, String[] fields) throws SQLException {
+        String sql = "UPDATE customers SET first_name=?, last_name=?, email=?, phone_number=?, address=?, license_number=? WHERE customer_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, fields[1]);
+        pst.setString(2, fields[2]);
+        pst.setString(3, fields[3]);
+        pst.setString(4, fields[4].isEmpty() ? null : fields[4]);
+        pst.setString(5, fields[5].isEmpty() ? null : fields[5]);
+        pst.setString(6, fields[6].isEmpty() ? null : fields[6]);
+        pst.setInt(7, Integer.parseInt(fields[0]));
+        pst.executeUpdate();
+        return "SUCCESS|Customer updated successfully";
+    }
+    
+    private String updateEmployee(Connection conn, String[] fields) throws SQLException {
+        String sql = "UPDATE employees_login SET first_name=?, last_name=?, email=?, phone_number=?, address=?, password_hash=? WHERE employee_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, fields[1]);
+        pst.setString(2, fields[2]);
+        pst.setString(3, fields[3]);
+        pst.setString(4, fields[4].isEmpty() ? null : fields[4]);
+        pst.setString(5, fields[5].isEmpty() ? null : fields[5]);
+        pst.setString(6, fields[6]);
+        pst.setInt(7, Integer.parseInt(fields[0]));
+        pst.executeUpdate();
+        return "SUCCESS|Employee updated successfully";
+    }
+    
+    // ==================== DELETE OPERATIONS ====================
+    
     private String handleDelete(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             int id = Integer.parseInt(data);
@@ -342,6 +491,21 @@ public class ClientHandler extends Thread {
                 case "EmployeeAssignments":
                     sql = "DELETE FROM employeeassignments WHERE assignment_id=?";
                     break;
+                case "VehicleMaintenance":
+                    sql = "DELETE FROM vehiclemaintenance WHERE maintenance_id=?";
+                    break;
+                case "Rentals":
+                    sql = "DELETE FROM rentals WHERE rental_id=?";
+                    break;
+                case "Payments":
+                    sql = "DELETE FROM payments WHERE payment_id=?";
+                    break;
+                case "Customers":
+                    sql = "DELETE FROM customers WHERE customer_id=?";
+                    break;
+                case "Employees":
+                    sql = "DELETE FROM employees_login WHERE employee_id=?";
+                    break;
                 default:
                     return "ERROR|Unknown table: " + table;
             }
@@ -356,9 +520,8 @@ public class ClientHandler extends Thread {
         }
     }
     
-    /**
-     * Handle FIND requests
-     */
+    // ==================== FIND OPERATIONS ====================
+    
     private String handleFind(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             int id = Integer.parseInt(data);
@@ -374,6 +537,16 @@ public class ClientHandler extends Thread {
                     return findDamage(conn, id);
                 case "EmployeeAssignments":
                     return findAssignment(conn, id);
+                case "VehicleMaintenance":
+                    return findMaintenance(conn, id);
+                case "Rentals":
+                    return findRental(conn, id);
+                case "Payments":
+                    return findPayment(conn, id);
+                case "Customers":
+                    return findCustomer(conn, id);
+                case "Employees":
+                    return findEmployee(conn, id);
                 default:
                     return "ERROR|Unknown table: " + table;
             }
@@ -478,9 +651,96 @@ public class ClientHandler extends Thread {
         return "ERROR|Assignment not found";
     }
     
-    /**
-     * Handle LIST requests
-     */
+    private String findMaintenance(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM vehiclemaintenance WHERE maintenance_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            return "SUCCESS|" + rs.getInt("car_id") + "," +
+                   rs.getDate("service_date") + "," +
+                   rs.getString("description") + "," +
+                   rs.getDouble("cost");
+        }
+        return "ERROR|Maintenance record not found";
+    }
+    
+    private String findRental(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM rentals WHERE rental_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            return "SUCCESS|" + rs.getInt("customer_id") + "," +
+                   rs.getInt("car_id") + "," +
+                   rs.getInt("employee_id") + "," +
+                   rs.getDate("start_date") + "," +
+                   rs.getDate("end_date") + "," +
+                   rs.getDouble("total_amount") + "," +
+                   rs.getString("status");
+        }
+        return "ERROR|Rental not found";
+    }
+    
+    private String findPayment(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM payments WHERE payment_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            return "SUCCESS|" + rs.getInt("rental_id") + "," +
+                   rs.getDouble("amount") + "," +
+                   rs.getDate("payment_date") + "," +
+                   rs.getString("payment_method") + "," +
+                   rs.getString("payment_status");
+        }
+        return "ERROR|Payment not found";
+    }
+    
+    private String findCustomer(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM customers WHERE customer_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            String phone = rs.getString("phone_number");
+            String address = rs.getString("address");
+            String license = rs.getString("license_number");
+            return "SUCCESS|" + rs.getString("first_name") + "," +
+                   rs.getString("last_name") + "," +
+                   rs.getString("email") + "," +
+                   (phone != null ? phone : "") + "," +
+                   (address != null ? address : "") + "," +
+                   (license != null ? license : "");
+        }
+        return "ERROR|Customer not found";
+    }
+    
+    private String findEmployee(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM employees_login WHERE employee_id=?";
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setInt(1, id);
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            String phone = rs.getString("phone_number");
+            String address = rs.getString("address");
+            return "SUCCESS|" + rs.getString("first_name") + "," +
+                   rs.getString("last_name") + "," +
+                   rs.getString("email") + "," +
+                   (phone != null ? phone : "") + "," +
+                   (address != null ? address : "") + "," +
+                   rs.getString("password_hash");
+        }
+        return "ERROR|Employee not found";
+    }
+    
+    // ==================== LIST OPERATIONS ====================
+    
     private String handleList(String table) {
         try (Connection conn = DbConnection.getConnection()) {
             
@@ -495,10 +755,16 @@ public class ClientHandler extends Thread {
                     return listDamages(conn);
                 case "EmployeeAssignments":
                     return listAssignments(conn);
-                case "Employees":
-                    return listEmployees(conn);
+                case "VehicleMaintenance":
+                    return listMaintenance(conn);
                 case "Rentals":
                     return listRentals(conn);
+                case "Payments":
+                    return listPayments(conn);
+                case "Customers":
+                    return listCustomers(conn);
+                case "Employees":
+                    return listEmployees(conn);
                 default:
                     return "ERROR|Unknown table: " + table;
             }
@@ -589,8 +855,8 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
     
-    private String listEmployees(Connection conn) throws SQLException {
-        String sql = "SELECT employee_id, username FROM employees_login ORDER BY employee_id";
+    private String listMaintenance(Connection conn) throws SQLException {
+        String sql = "SELECT maintenance_id, service_date FROM vehiclemaintenance ORDER BY maintenance_id";
         Statement st = conn.createStatement();
         ResultSet rs = st.executeQuery(sql);
         
@@ -598,8 +864,8 @@ public class ClientHandler extends Thread {
         boolean first = true;
         while (rs.next()) {
             if (!first) result.append(";");
-            result.append(rs.getInt("employee_id")).append(" - ")
-                  .append(rs.getString("username"));
+            result.append(rs.getInt("maintenance_id")).append(" - ")
+                  .append(rs.getDate("service_date"));
             first = false;
         }
         return result.toString();
@@ -615,6 +881,56 @@ public class ClientHandler extends Thread {
         while (rs.next()) {
             if (!first) result.append(";");
             result.append(rs.getInt("rental_id"));
+            first = false;
+        }
+        return result.toString();
+    }
+    
+    private String listPayments(Connection conn) throws SQLException {
+        String sql = "SELECT payment_id, payment_date FROM payments ORDER BY payment_id";
+        Statement st = conn.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        
+        StringBuilder result = new StringBuilder("SUCCESS|");
+        boolean first = true;
+        while (rs.next()) {
+            if (!first) result.append(";");
+            result.append(rs.getInt("payment_id")).append(" - ")
+                  .append(rs.getDate("payment_date"));
+            first = false;
+        }
+        return result.toString();
+    }
+    
+    private String listCustomers(Connection conn) throws SQLException {
+        String sql = "SELECT customer_id, first_name, last_name FROM customers ORDER BY customer_id";
+        Statement st = conn.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        
+        StringBuilder result = new StringBuilder("SUCCESS|");
+        boolean first = true;
+        while (rs.next()) {
+            if (!first) result.append(";");
+            result.append(rs.getInt("customer_id")).append(" - ")
+                  .append(rs.getString("first_name")).append(" ")
+                  .append(rs.getString("last_name"));
+            first = false;
+        }
+        return result.toString();
+    }
+    
+    private String listEmployees(Connection conn) throws SQLException {
+        String sql = "SELECT employee_id, first_name, last_name FROM employees_login ORDER BY employee_id";
+        Statement st = conn.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        
+        StringBuilder result = new StringBuilder("SUCCESS|");
+        boolean first = true;
+        while (rs.next()) {
+            if (!first) result.append(";");
+            result.append(rs.getInt("employee_id")).append(" - ")
+                  .append(rs.getString("first_name")).append(" ")
+                  .append(rs.getString("last_name"));
             first = false;
         }
         return result.toString();

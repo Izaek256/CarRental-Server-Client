@@ -167,6 +167,97 @@ Tracks maintenance activities for vehicles.
 
 ---
 
+### 9. Branch Management (`BranchMgt.java`)
+Manages branch locations and their information.
+
+**Fields:**
+- Branch ID (JComboBox) - Dropdown for selecting existing branches
+- Branch Name (JTextField) - Name of the branch
+- Address (JTextField) - Street address of the branch
+- City (JTextField) - City where the branch is located
+- Phone Number (JTextField) - Contact phone number
+- Email (JTextField) - Contact email address
+- Manager (JComboBox) - Dropdown for selecting branch manager
+- Status (JComboBox) - Current status (Active, Inactive)
+
+**Buttons:**
+- Add (JButton) - Creates a new branch
+- Update (JButton) - Updates selected branch information
+- Delete (JButton) - Removes selected branch
+- Clear (JButton) - Clears all form fields
+- Find (JButton) - Retrieves information for selected branch
+- Back To Dashboard (JButton) - Returns to main dashboard
+
+---
+
+### 10. Damages Management (`DamagesMgt.java`)
+Tracks vehicle damages reported during rentals.
+
+**Fields:**
+- Damage ID (JComboBox) - Dropdown for selecting existing damage records
+- Rental ID (JComboBox) - Dropdown for selecting associated rental
+- Car (JComboBox) - Dropdown for selecting damaged car
+- Description (JTextArea) - Description of the damage
+- Repair Cost (JTextField) - Cost to repair the damage
+- Reported Date (JDateChooser) - Date when damage was reported
+- Status (JComboBox) - Current status (Reported, Assessed, Repaired)
+
+**Buttons:**
+- Add (JButton) - Creates a new damage record
+- Update (JButton) - Updates selected damage information
+- Delete (JButton) - Removes selected damage record
+- Clear (JButton) - Clears all form fields
+- Find (JButton) - Retrieves information for selected damage record
+- Back To Dashboard (JButton) - Returns to main dashboard
+
+---
+
+### 11. Employee Assignment Management (`EmployeeAssignmentMgt.java`)
+Manages employee assignments to branches and roles.
+
+**Fields:**
+- Assignment ID (JComboBox) - Dropdown for selecting existing assignments
+- Employee (JComboBox) - Dropdown for selecting employee
+- Branch (JComboBox) - Dropdown for selecting branch
+- Assignment Type (JComboBox) - Type of assignment (Rental, Maintenance, Customer Service, Management, Cleaning)
+- Assignment Date (JDateChooser) - Date of assignment
+- Description (JTextArea) - Description of the assignment
+- Status (JComboBox) - Current status (Active, Completed, Cancelled)
+
+**Buttons:**
+- Add (JButton) - Creates a new employee assignment
+- Update (JButton) - Updates selected assignment information
+- Delete (JButton) - Removes selected assignment
+- Clear (JButton) - Clears all form fields
+- Find (JButton) - Retrieves information for selected assignment
+- Back To Dashboard (JButton) - Returns to main dashboard
+
+---
+
+### 12. Insurance Management (`InsuranceMgt.java`)
+Manages insurance policies for vehicles.
+
+**Fields:**
+- Insurance ID (JComboBox) - Dropdown for selecting existing insurance policies
+- Car (JComboBox) - Dropdown for selecting insured car
+- Policy Number (JTextField) - Insurance policy number
+- Insurance Company (JTextField) - Name of the insurance company
+- Coverage Amount (JTextField) - Amount of coverage
+- Premium Amount (JTextField) - Insurance premium cost
+- Start Date (JDateChooser) - Policy start date
+- End Date (JDateChooser) - Policy end date
+- Status (JComboBox) - Current status (Active, Expired)
+
+**Buttons:**
+- Add (JButton) - Creates a new insurance policy
+- Update (JButton) - Updates selected policy information
+- Delete (JButton) - Removes selected policy
+- Clear (JButton) - Clears all form fields
+- Find (JButton) - Retrieves information for selected policy
+- Back To Dashboard (JButton) - Returns to main dashboard
+
+---
+
 ## Database Connection
 
 The application connects to a MySQL database using the following credentials:
