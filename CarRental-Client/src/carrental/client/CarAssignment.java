@@ -44,91 +44,107 @@ public class CarAssignment extends javax.swing.JFrame {
     }
 
     private void loadCustomers() {
-        try (Connection conn = DbConnection.getConnection();) {
+        try {
             CustomerComboBox.removeAllItems();
             CustomerComboBox.addItem("Select Customer");
 
-            String sql = "SELECT customer_id, CONCAT(first_name, ' ', last_name) as full_name FROM Customers ORDER BY first_name";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
+            // Send LIST request to server
+            String request = "LIST|Customers|";
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            while (rs.next()) {
-                CustomerComboBox.addItem(rs.getInt("customer_id") + " - " + rs.getString("full_name"));
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] customers = parts[1].split(";");
+                for (String customer : customers) {
+                    CustomerComboBox.addItem(customer);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error loading customers: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
-
-            rs.close();
-            pst.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading customers: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void loadRentalId() {
-        try (Connection conn = DbConnection.getConnection()) {
+        try {
             CmbBoxRentalId.removeAllItems();
             CmbBoxRentalId.addItem("Select Rental");
 
-            String sql = "SELECT r.rental_id, c.first_name "
-                    + "FROM Rentals r "
-                    + "JOIN Customers c ON r.customer_id = c.customer_id "
-                    + "ORDER BY r.rental_id ASC";
+            // Send LIST request to server for rentals
+            String request = "LIST|Rentals|";
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            PreparedStatement pst = conn.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next()) {
-                int rentalId = rs.getInt("rental_id");
-                String customerName = rs.getString("first_name"); // you can also use last_name if needed
-                CmbBoxRentalId.addItem(rentalId + " - " + customerName);
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] rentals = parts[1].split(";");
+                for (String rental : rentals) {
+                    // Format: "rental_id - Customer: customer_id"
+                    CmbBoxRentalId.addItem(rental);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error loading rentals: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
-
-            rs.close();
-            pst.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading rental IDs: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void loadCars() {
-        try (Connection conn = DbConnection.getConnection();) {
+        try {
             CarComboBox.removeAllItems();
             CarComboBox.addItem("Select Car");
-            String sql = "SELECT car_id, CONCAT(make, ' ', model, ' (', license_plate, ')') as car_info, rental_rate "
-                    + "FROM Cars WHERE status = 'Available' ORDER BY make, model";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
 
-            while (rs.next()) {
-                CarComboBox.addItem(rs.getInt("car_id") + " - " + rs.getString("car_info")
-                        + " - Ugx" + rs.getBigDecimal("rental_rate") + "/day");
+            // Send LIST request to server for available cars
+            String request = "LIST|Cars|";
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] cars = parts[1].split(";");
+                for (String car : cars) {
+                    // Format: "car_id - make model"
+                    // We'll need additional info for rental rate, so we'll handle that separately
+                    CarComboBox.addItem(car);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error loading cars: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
-
-            rs.close();
-            pst.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading cars: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void loadEmployees() {
-        try (Connection conn = DbConnection.getConnection();) {
+        try {
             EmployeeComboBox.removeAllItems();
             EmployeeComboBox.addItem("Select Employee");
 
-            String sql = "SELECT employee_id, CONCAT(first_name, ' ', last_name) as full_name FROM employees_login ORDER BY first_name";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
+            // Send LIST request to server
+            String request = "LIST|Employees|";
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            while (rs.next()) {
-                EmployeeComboBox.addItem(rs.getInt("employee_id") + " - " + rs.getString("full_name"));
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] employees = parts[1].split(";");
+                for (String employee : employees) {
+                    EmployeeComboBox.addItem(employee);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error loading employees: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
-
-            rs.close();
-            pst.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading employees: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -136,19 +152,19 @@ public class CarAssignment extends javax.swing.JFrame {
 
     private void calculateAmount() {
         if (CarComboBox.getSelectedIndex() > 0 && dateStartDate.getDate() != null && dateEndDate.getDate() != null) {
-            try (Connection conn = DbConnection.getConnection()) {
+            try {
                 // Get car ID from selection
                 String carSelection = CarComboBox.getSelectedItem().toString();
                 int carId = Integer.parseInt(carSelection.split(" - ")[0]);
 
-                // Get rental rate
-                String sql = "SELECT rental_rate FROM Cars WHERE car_id = ?";
-                PreparedStatement pst = conn.prepareStatement(sql);
-                pst.setInt(1, carId);
-                ResultSet rs = pst.executeQuery();
+                // Get rental rate using FIND request
+                String request = "FIND|Cars|" + carId;
+                String response = ServerConnection.getInstance().sendRequest(request);
 
-                if (rs.next()) {
-                    double dailyRate = rs.getDouble("rental_rate");
+                String[] parts = response.split("\\|", 2);
+                if (parts[0].equals("SUCCESS")) {
+                    String[] fields = parts[1].split(",");
+                    double dailyRate = Double.parseDouble(fields[4]); // rental_rate is at index 4
 
                     // Calculate days
                     LocalDate startDate = dateStartDate.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
@@ -161,10 +177,9 @@ public class CarAssignment extends javax.swing.JFrame {
 
                     double totalAmount = dailyRate * days;
                     txtAmount.setText(String.format("%.2f", totalAmount));
+                } else {
+                    txtAmount.setText("0.00");
                 }
-
-                rs.close();
-                pst.close();
             } catch (Exception e) {
                 txtAmount.setText("0.00");
             }
@@ -405,46 +420,56 @@ public class CarAssignment extends javax.swing.JFrame {
     }//GEN-LAST:event_txtAmountActionPerformed
 
     private void btnRentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRentActionPerformed
-        // TODO add your handling code here:
+        try {
+            // Validation
+            if (CustomerComboBox.getSelectedIndex() <= 0 || CarComboBox.getSelectedIndex() <= 0
+                    || EmployeeComboBox.getSelectedIndex() <= 0 || dateStartDate.getDate() == null
+                    || dateEndDate.getDate() == null) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
+            }
 
-        try (Connection conn = DbConnection.getConnection()) {
             // Get selected IDs
             int customerId = Integer.parseInt(CustomerComboBox.getSelectedItem().toString().split(" - ")[0]);
             int carId = Integer.parseInt(CarComboBox.getSelectedItem().toString().split(" - ")[0]);
             int employeeId = Integer.parseInt(EmployeeComboBox.getSelectedItem().toString().split(" - ")[0]);
 
             // Prepare dates
-            Date startDate = new Date(dateStartDate.getDate().getTime());
-            Date endDate = new Date(dateEndDate.getDate().getTime());
+            java.sql.Date startDate = new java.sql.Date(dateStartDate.getDate().getTime());
+            java.sql.Date endDate = new java.sql.Date(dateEndDate.getDate().getTime());
             double amount = Double.parseDouble(txtAmount.getText());
 
-            // Insert rental
-            String sql = "INSERT INTO Rentals (customer_id, car_id, employee_id, start_date, end_date, total_amount, status) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, 'Active')";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, customerId);
-            pst.setInt(2, carId);
-            pst.setInt(3, employeeId);
-            pst.setDate(4, startDate);
-            pst.setDate(5, endDate);
-            pst.setDouble(6, amount);
+            // Prepare data: customer_id,car_id,employee_id,start_date,end_date,total_amount,status
+            String data = customerId + ","
+                    + carId + ","
+                    + employeeId + ","
+                    + startDate.toString() + ","
+                    + endDate.toString() + ","
+                    + amount + ","
+                    + "Active";
 
-            int result = pst.executeUpdate();
+            // Send ADD request to server
+            String request = "ADD|Rentals|" + data;
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            if (result > 0) {
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
                 // Update car status to 'Rented'
-                String updateCarSql = "UPDATE Cars SET status = 'Rented' WHERE car_id = ?";
-                PreparedStatement updatePst = conn.prepareStatement(updateCarSql);
-                updatePst.setInt(1, carId);
-                updatePst.executeUpdate();
-                updatePst.close();
+                String carData = carId + ",,,,Rented,,"; // Only updating status
+                String updateRequest = "UPDATE|Cars|" + carData;
+                ServerConnection.getInstance().sendRequest(updateRequest);
 
                 JOptionPane.showMessageDialog(this, "Car rented successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                clearFields();
+                loadCars(); // Refresh available cars
+                loadRentalId(); // Refresh rentals list
+            } else {
+                JOptionPane.showMessageDialog(this, "Error renting car: "
+                        + (parts.length > 1 ? parts[1] : "Server error"),
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            pst.close();
-            clearFields();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error renting car: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -468,53 +493,56 @@ public class CarAssignment extends javax.swing.JFrame {
             return;
         }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            int rentalId = Integer.parseInt(rentalIdStr.split("-")[0].trim());
+        try {
+            int rentalId = Integer.parseInt(rentalIdStr.split(" - ")[0].trim());
 
-            String sql = "SELECT r.customer_id, r.car_id, r.employee_id, r.start_date, r.end_date, r.total_amount, "
-                    + "c.first_name, c.last_name, car.make, car.model, car.license_plate, "
-                    + "e.first_name AS emp_first, e.last_name AS emp_last "
-                    + "FROM Rentals r "
-                    + "JOIN Customers c ON r.customer_id = c.customer_id "
-                    + "JOIN Cars car ON r.car_id = car.car_id "
-                    + "JOIN employees_login e ON r.employee_id = e.employee_id "
-                    + "WHERE r.rental_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, rentalId);
-            ResultSet rs = pst.executeQuery();
+            // Send FIND request to server
+            String request = "FIND|Rentals|" + rentalId;
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            if (rs.next()) {
-                // Set combo boxes properly
-                CustomerComboBox.setSelectedItem(rs.getInt("customer_id") + " - "
-                        + rs.getString("first_name") + " "
-                        + rs.getString("last_name"));
-                // Car
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                // Response format: customer_id,car_id,employee_id,start_date,end_date,total_amount,status
+                String[] fields = parts[1].split(",");
+
+                int customerId = Integer.parseInt(fields[0]);
+                int carId = Integer.parseInt(fields[1]);
+                int employeeId = Integer.parseInt(fields[2]);
+
+                // Set customer
+                for (int i = 0; i < CustomerComboBox.getItemCount(); i++) {
+                    if (CustomerComboBox.getItemAt(i).startsWith(customerId + " -")) {
+                        CustomerComboBox.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
+                // Set car
                 for (int i = 0; i < CarComboBox.getItemCount(); i++) {
-                    if (CarComboBox.getItemAt(i).startsWith(rs.getInt("car_id") + " -")) {
+                    if (CarComboBox.getItemAt(i).startsWith(carId + " -")) {
                         CarComboBox.setSelectedIndex(i);
                         break;
                     }
                 }
-                // Employee
+
+                // Set employee
                 for (int i = 0; i < EmployeeComboBox.getItemCount(); i++) {
-                    if (EmployeeComboBox.getItemAt(i).startsWith(rs.getInt("employee_id") + " -")) {
+                    if (EmployeeComboBox.getItemAt(i).startsWith(employeeId + " -")) {
                         EmployeeComboBox.setSelectedIndex(i);
                         break;
                     }
                 }
 
                 // Dates
-                dateStartDate.setDate(rs.getDate("start_date"));
-                dateEndDate.setDate(rs.getDate("end_date"));
+                dateStartDate.setDate(java.sql.Date.valueOf(fields[3]));
+                dateEndDate.setDate(java.sql.Date.valueOf(fields[4]));
 
                 // Amount
-                txtAmount.setText(String.format("%.2f", rs.getDouble("total_amount")));
+                txtAmount.setText(String.format("%.2f", Double.parseDouble(fields[5])));
             } else {
                 JOptionPane.showMessageDialog(this, "Rental ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            rs.close();
-            pst.close();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error finding rental: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -533,36 +561,39 @@ public class CarAssignment extends javax.swing.JFrame {
             return;
         }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            int rentalId = Integer.parseInt(CmbBoxRentalId.getSelectedItem().toString().split("-")[0].trim());
+        try {
+            int rentalId = Integer.parseInt(CmbBoxRentalId.getSelectedItem().toString().split(" - ")[0].trim());
             int customerId = Integer.parseInt(CustomerComboBox.getSelectedItem().toString().split(" - ")[0]);
             int carId = Integer.parseInt(CarComboBox.getSelectedItem().toString().split(" - ")[0]);
             int employeeId = Integer.parseInt(EmployeeComboBox.getSelectedItem().toString().split(" - ")[0]);
-            Date startDate = new Date(dateStartDate.getDate().getTime());
-            Date endDate = new Date(dateEndDate.getDate().getTime());
+            java.sql.Date startDate = new java.sql.Date(dateStartDate.getDate().getTime());
+            java.sql.Date endDate = new java.sql.Date(dateEndDate.getDate().getTime());
             double amount = Double.parseDouble(txtAmount.getText());
 
-            String sql = "UPDATE Rentals SET customer_id=?, car_id=?, employee_id=?, start_date=?, end_date=?, total_amount=? "
-                    + "WHERE rental_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, customerId);
-            pst.setInt(2, carId);
-            pst.setInt(3, employeeId);
-            pst.setDate(4, startDate);
-            pst.setDate(5, endDate);
-            pst.setDouble(6, amount);
-            pst.setInt(7, rentalId);
+            // Prepare data: rental_id,customer_id,car_id,employee_id,start_date,end_date,total_amount,status
+            String data = rentalId + ","
+                    + customerId + ","
+                    + carId + ","
+                    + employeeId + ","
+                    + startDate.toString() + ","
+                    + endDate.toString() + ","
+                    + amount + ","
+                    + "Active";
 
-            int rows = pst.executeUpdate();
-            pst.close();
+            // Send UPDATE request to server
+            String request = "UPDATE|Rentals|" + data;
+            String response = ServerConnection.getInstance().sendRequest(request);
 
-            if (rows > 0) {
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
                 JOptionPane.showMessageDialog(this, "Rental updated successfully!");
                 clearFields();
                 loadCars();
                 loadRentalId();
             } else {
-                JOptionPane.showMessageDialog(this, "Rental ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error updating rental: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -575,36 +606,42 @@ public class CarAssignment extends javax.swing.JFrame {
             return;
         }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            int rentalId = Integer.parseInt(CmbBoxRentalId.getSelectedItem().toString().split("-")[0].trim());
+        try {
+            int rentalId = Integer.parseInt(CmbBoxRentalId.getSelectedItem().toString().split(" - ")[0].trim());
 
-            // Get linked car
-            String getCarSql = "SELECT car_id FROM Rentals WHERE rental_id=?";
-            PreparedStatement getCarPst = conn.prepareStatement(getCarSql);
-            getCarPst.setInt(1, rentalId);
-            ResultSet rs = getCarPst.executeQuery();
+            // First get car_id from the rental
+            String findRequest = "FIND|Rentals|" + rentalId;
+            String findResponse = ServerConnection.getInstance().sendRequest(findRequest);
+
             int carId = -1;
-            if (rs.next()) {
-                carId = rs.getInt("car_id");
+            String[] findParts = findResponse.split("\\|", 2);
+            if (findParts[0].equals("SUCCESS")) {
+                String[] fields = findParts[1].split(",");
+                carId = Integer.parseInt(fields[1]); // car_id is at index 1
             }
-            rs.close();
-            getCarPst.close();
 
-            // Delete rental
-            String sql = "DELETE FROM Rentals WHERE rental_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, rentalId);
-            int rows = pst.executeUpdate();
-            pst.close();
+            // Confirm deletion
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this rental?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
 
-            if (rows > 0) {
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            // Send DELETE request to server
+            String request = "DELETE|Rentals|" + rentalId;
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
                 // Update car back to available
                 if (carId != -1) {
-                    String updateCarSql = "UPDATE Cars SET status='Available' WHERE car_id=?";
-                    PreparedStatement updatePst = conn.prepareStatement(updateCarSql);
-                    updatePst.setInt(1, carId);
-                    updatePst.executeUpdate();
-                    updatePst.close();
+                    String carData = carId + ",,,,Available,,"; // Only updating status
+                    String updateRequest = "UPDATE|Cars|" + carData;
+                    ServerConnection.getInstance().sendRequest(updateRequest);
                 }
 
                 JOptionPane.showMessageDialog(this, "Rental deleted successfully!");
@@ -612,7 +649,8 @@ public class CarAssignment extends javax.swing.JFrame {
                 loadCars();
                 loadRentalId();
             } else {
-                JOptionPane.showMessageDialog(this, "Rental ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error deleting rental: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
