@@ -119,29 +119,59 @@ public class Login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BtnloginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnloginActionPerformed
-        // TODO add your handling code here:
-        String email = txtEmailField.getText().trim();
-        String pasword = String.valueOf(Txtpass.getPassword()).trim();
+       String email = txtEmailField.getText().trim();
+        String password = String.valueOf(Txtpass.getPassword()).trim();
         
-        if(email.isEmpty() || pasword.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Please fill in the fileds ");
+        if(email.isEmpty() || password.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Please fill in the fields");
             return;
         }
-        try(Connection conn = DbConnection.getConnection()){
-            String sql = "SELECT * FROM employees_login where email = ? AND password_hash = ? ";
-            PreparedStatement pst = conn.prepareStatement(sql);
+        
+        try {
+            // We need to check if employee exists with this email and password
+            // Since we don't have a direct login method, we'll list all employees and check manually
+            String request = "LIST|Employees|";
+            String response = ServerConnection.getInstance().sendRequest(request);
             
-            pst.setString(1, email);
-            pst.setString(2, pasword);
-            
-            ResultSet rs = pst.executeQuery();
-            if(rs.next()){
-                JOptionPane.showMessageDialog(this, "You  are logged in! Welcome ");
-                new Dashboard().setVisible(true);
-                this.dispose();
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] employees = parts[1].split(";");
+                boolean found = false;
+                
+                // Check each employee by finding their details and comparing
+                for (String employee : employees) {
+                    int employeeId = Integer.parseInt(employee.split(" - ")[0]);
+                    
+                    // Get employee details to check email and password
+                    String findRequest = "FIND|Employees|" + employeeId;
+                    String findResponse = ServerConnection.getInstance().sendRequest(findRequest);
+                    
+                    String[] findParts = findResponse.split("\\|", 2);
+                    if (findParts[0].equals("SUCCESS")) {
+                        String[] fields = findParts[1].split(",");
+                        String empEmail = fields[2]; // email is at index 2
+                        String empPassword = fields[5]; // password_hash is at index 5
+                        
+                        if (empEmail.equals(email) && empPassword.equals(password)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (found) {
+                    JOptionPane.showMessageDialog(this, "You are logged in! Welcome");
+                    new Dashboard().setVisible(true);
+                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid email or password!");
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + 
+                    (parts.length > 1 ? parts[1] : "Server error"));
             }
-        }catch(Exception ex){
-            JOptionPane.showMessageDialog(this, "Database Error: "+ ex.getMessage());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Login Error: " + ex.getMessage());
         }
     }//GEN-LAST:event_BtnloginActionPerformed
 

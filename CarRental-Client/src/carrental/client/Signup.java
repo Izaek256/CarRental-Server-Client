@@ -215,47 +215,50 @@ public class Signup extends javax.swing.JFrame {
 
     private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed
         // TODO add your handling code here:
-
-        String first = txtFirstnameField.getText();
+String first = txtFirstnameField.getText();
         String last = txtLastnameField.getText();
         String email = txtEmailField.getText();
         String phone = txtPhoneField.getText();
-        String password = txtPasswordField.getText();
-        String confirm = txtConfirmPassField.getText();
+        String password = String.valueOf(txtPasswordField.getPassword());
+        String confirm = String.valueOf(txtConfirmPassField.getPassword());
         String address = txtAddressField.getText();
 
         if (!password.equals(confirm)) {
-            JOptionPane.showMessageDialog(this, "Password doesnt match");
+            JOptionPane.showMessageDialog(this, "Password doesn't match");
+            return;
         }
         if (first.isEmpty() || last.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty() || confirm.isEmpty() || address.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fileds ");
+            JOptionPane.showMessageDialog(this, "Please fill all fields");
             txtFirstnameField.requestFocus();
-        } else {
-
-            try (Connection conn = DbConnection.getConnection()) {
-
-                String sql = "INSERT INTO employees_login(first_name, last_name, email, phone_number, address, password_hash) VALUES(?,?,?,?,?,?)";
-
-                PreparedStatement pst = conn.prepareStatement(sql);
-
-                pst.setString(1, first);
-                pst.setString(2, last);
-                pst.setString(3, email);
-                pst.setString(4, phone);
-                pst.setString(5, address);
-                pst.setString(6, password);
-
-                pst.executeUpdate();
-                JOptionPane.showMessageDialog(this, "Employee Registers Succesfully");
-//            Dashboard.Main();
-                new Dashboard().setVisible(true);
-                dispose();
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error" + ex.getMessage());
-            }
-
+            return;
         }
 
+        try {
+            // Prepare data: first_name,last_name,email,phone_number,address,password_hash
+            String data = first + "," +
+                         last + "," +
+                         email + "," +
+                         phone + "," +
+                         address + "," +
+                         password;
+
+            // Send ADD request to server
+            String request = "ADD|Employees|" + data;
+            String response = ServerConnection.getInstance().sendRequest(request);
+            
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, "Employee Registered Successfully");
+                new Dashboard().setVisible(true);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: " + 
+                    (parts.length > 1 ? parts[1] : "Server error"));
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
     }//GEN-LAST:event_btnSignupActionPerformed
 
     private void txtEmailFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailFieldActionPerformed

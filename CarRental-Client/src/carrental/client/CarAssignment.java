@@ -5,10 +5,7 @@
 package carrental.client;
 
 import javax.swing.JOptionPane;
-import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.time.*;
-import com.toedter.calendar.JDateChooser;
 import java.time.temporal.ChronoUnit;
 
 /**

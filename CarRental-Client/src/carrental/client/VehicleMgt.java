@@ -12,34 +12,51 @@ import javax.swing.*;
  * @author Izaek Kisuule
  */
 public class VehicleMgt extends javax.swing.JFrame {
-    
+
     public VehicleMgt() {
         initComponents();
         setSize(900, 900);
         loadCarIds();
+        clearFields();
         setTitle("Car Management - Car Rental System");
         setLocationRelativeTo(null);
     }
-    
+
     private void loadCarIds() {
         ComboBoxCarId.removeAllItems();
         ComboBoxCarId.addItem("Select Car");
-        
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT car_id, make, model FROM Cars ORDER BY car_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while (rs.next()) {
-                int carId = rs.getInt("car_id");
-                String make = rs.getString("make");
-                String model = rs.getString("model");
-                ComboBoxCarId.addItem(carId + " - " + make + " " + model);
+
+        try {
+            // Send LIST request to server
+            String request = "LIST|Cars|";
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] cars = parts[1].split(";");
+                for (String car : cars) {
+                    ComboBoxCarId.addItem(car);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Error loading cars: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
             }
-            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading car IDs: " + ex.getMessage());
         }
+    }
+
+    private void clearFields() {
+        txtColor.setText("");
+        txtMake.setText("");
+        txtMile.setText("");
+        txtModel.setText("");
+        txtPlate.setText("");
+        txtRate.setText("");
+        txtYear.setText("");
+        cmbStatus.setSelectedIndex(0);
+        ComboBoxCarId.setSelectedIndex(0);
     }
 
     /**
@@ -280,26 +297,29 @@ public class VehicleMgt extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please select a car!");
             return;
         }
-        
         int carId = Integer.parseInt(selected.split(" - ")[0]);
-        
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT * FROM Cars WHERE car_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            ResultSet rs = pst.executeQuery();
-            
-            if (rs.next()) {
-                txtMake.setText(rs.getString("make"));
-                txtModel.setText(rs.getString("model"));
-                txtYear.setText(String.valueOf(rs.getInt("year")));
-                txtPlate.setText(rs.getString("license_plate"));
-                txtRate.setText(String.valueOf(rs.getDouble("rental_rate")));
-                cmbStatus.setSelectedItem(rs.getString("status"));
-                txtColor.setText(rs.getString("color"));
-                txtMile.setText(String.valueOf(rs.getInt("mileage")));
+        try {
+            // Send FIND request to server
+            String request = "FIND|Cars|" + carId;
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                // Response format: make,model,year,license_plate,rental_rate,status,color,mileage
+                String[] fields = parts[1].split(",");
+
+                txtMake.setText(fields[0]);          // make
+                txtModel.setText(fields[1]);         // model
+                txtYear.setText(fields[2]);          // year
+                txtPlate.setText(fields[3]);         // license_plate
+                txtRate.setText(fields[4]);          // rental_rate
+                cmbStatus.setSelectedItem(fields[5]); // status
+                txtColor.setText(fields[6]);         // color
+                txtMile.setText(fields[7]);          // mileage
             } else {
-                JOptionPane.showMessageDialog(this, "Car not found!");
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Car not found"));
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error finding car: " + ex.getMessage());
@@ -307,32 +327,40 @@ public class VehicleMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFindActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
-
-        if (txtMake.getText().isEmpty() || txtModel.getText().isEmpty() || txtYear.getText().isEmpty() || txtPlate.getText().isEmpty() || txtRate.getText().isEmpty() || txtColor.getText().isEmpty() || cmbStatus.getSelectedItem().equals(false) || txtMile.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Enter all informations in the fields");
+        if (txtMake.getText().isEmpty() || txtModel.getText().isEmpty() || txtYear.getText().isEmpty()
+                || txtPlate.getText().isEmpty() || txtRate.getText().isEmpty() || txtColor.getText().isEmpty()
+                || txtMile.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Enter all information in the fields");
+            return;
         }
-        
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO Cars(make, model, year,license_plate, rental_rate, status, color, mileage) VALUES (?,?,?,?,?,?,?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtMake.getText());
-            pst.setString(2, txtModel.getText());
-            pst.setInt(3, Integer.parseInt(txtYear.getText()));
-            pst.setString(4, txtPlate.getText());
-            pst.setDouble(5, Double.parseDouble(txtRate.getText()));
-            pst.setString(6, cmbStatus.getSelectedItem().toString());
-            pst.setString(7, txtColor.getText());
-            pst.setInt(8, Integer.parseInt(txtMile.getText()));
-            
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Car Added!");
-//            loadCars();
+        try {
+            // Prepare data: make,model,year,license_plate,rental_rate,status,color,mileage
+            String data = txtMake.getText() + ","
+                    + txtModel.getText() + ","
+                    + txtYear.getText() + ","
+                    + txtPlate.getText() + ","
+                    + txtRate.getText() + ","
+                    + cmbStatus.getSelectedItem().toString() + ","
+                    + txtColor.getText() + ","
+                    + txtMile.getText();
 
+            // Send ADD request to server
+            String request = "ADD|Cars|" + data;
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, "Car Added!");
+                clearFields();
+                loadCarIds(); // Refresh the combo box
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
+            }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error :" + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
-
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
@@ -341,37 +369,35 @@ public class VehicleMgt extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please select a car!");
             return;
         }
-        
+
         int carId = Integer.parseInt(selected.split(" - ")[0]);
-        
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE Cars SET make=?, model=?, year=?, license_plate=?, rental_rate=?, status=?, color=?, mileage=? WHERE car_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtMake.getText());
-            pst.setString(2, txtModel.getText());
-            pst.setInt(3, Integer.parseInt(txtYear.getText()));
-            pst.setString(4, txtPlate.getText());
-            pst.setDouble(5, Double.parseDouble(txtRate.getText()));
-            pst.setString(6, cmbStatus.getSelectedItem().toString());
-            pst.setString(7, txtColor.getText());
-            pst.setInt(8, Integer.parseInt(txtMile.getText()));
-            pst.setInt(9, carId);
-            
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Car Updated!");
-            
-            txtColor.setText("");
-            txtMake.setText("");
-            txtMile.setText("");
-            txtModel.setText("");
-            txtPlate.setText("");
-            txtRate.setText("");
-            txtYear.setText("");
-            cmbStatus.setSelectedIndex(0);
-            ComboBoxCarId.setSelectedIndex(0);
-            
-            loadCarIds();
-            
+
+        try {
+            // Prepare data: car_id,make,model,year,license_plate,rental_rate,status,color,mileage
+            String data = carId + ","
+                    + txtMake.getText() + ","
+                    + txtModel.getText() + ","
+                    + txtYear.getText() + ","
+                    + txtPlate.getText() + ","
+                    + txtRate.getText() + ","
+                    + cmbStatus.getSelectedItem().toString() + ","
+                    + txtColor.getText() + ","
+                    + txtMile.getText();
+
+            // Send UPDATE request to server
+            String request = "UPDATE|Cars|" + data;
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, "Car Updated!");
+                clearFields();
+                loadCarIds();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating car: " + ex.getMessage());
         }
@@ -384,15 +410,7 @@ public class VehicleMgt extends javax.swing.JFrame {
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         // TODO add your handling code here:
 
-        txtColor.setText("");
-        txtMake.setText("");
-        txtMile.setText("");
-        txtModel.setText("");
-        txtPlate.setText("");
-        txtRate.setText("");
-        txtYear.setText("");
-        cmbStatus.setSelectedItem("");
-        ComboBoxCarId.setSelectedIndex(0);
+        clearFields();
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -401,28 +419,34 @@ public class VehicleMgt extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please select a car!");
             return;
         }
-        
+
         int carId = Integer.parseInt(selected.split(" - ")[0]);
-        
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "DELETE FROM Cars WHERE car_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Car Deleted!");
-            
-            txtColor.setText("");
-            txtMake.setText("");
-            txtMile.setText("");
-            txtModel.setText("");
-            txtPlate.setText("");
-            txtRate.setText("");
-            txtYear.setText("");
-            cmbStatus.setSelectedIndex(0);
-            ComboBoxCarId.setSelectedIndex(0);
-            
-            loadCarIds();
-            
+
+        // Confirm deletion
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete this car?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            // Send DELETE request to server
+            String request = "DELETE|Cars|" + carId;
+            String response = ServerConnection.getInstance().sendRequest(request);
+
+            // Parse response
+            String[] parts = response.split("\\|", 2);
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, "Car Deleted!");
+                clearFields();
+                loadCarIds();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error: "
+                        + (parts.length > 1 ? parts[1] : "Server error"));
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting car: " + ex.getMessage());
         }
@@ -430,8 +454,9 @@ public class VehicleMgt extends javax.swing.JFrame {
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         // TODO add your handling code here:
-        dispose();
+
         new Dashboard().setVisible(true);
+        dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void txtModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtModelActionPerformed
