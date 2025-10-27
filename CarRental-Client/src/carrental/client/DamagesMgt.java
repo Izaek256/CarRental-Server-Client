@@ -3,7 +3,7 @@
  */
 package carrental.client;
 
-import java.sql.*;
+import java.awt.event.ItemEvent;
 import java.text.SimpleDateFormat;
 import javax.swing.*;
 
@@ -13,26 +13,61 @@ import javax.swing.*;
  */
 public class DamagesMgt extends javax.swing.JFrame {
 
+    private boolean isLoadingData = false;
+
     /**
      * Creates new form DamagesMgt
      */
     public DamagesMgt() {
         initComponents();
-        setSize(900, 750);
+        setSize(750, 750);
         setTitle("Damages Management - Car Rental System");
         setLocationRelativeTo(null);
+        isLoadingData = true; // Disable auto-fill during initial load
         loadDamageIds();
         loadRentalIds();
         loadCarIds();
+        isLoadingData = false;
+        cmbRentalId.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED && !isLoadingData) {
+                autoFillCarFromRental();
+            }
+        });
     }
 
-    private void selectItemInComboBox(JComboBox<String> comboBox, int id) {
-        for (int i = 0; i < comboBox.getItemCount(); i++) {
-            String item = comboBox.getItemAt(i);
-            if (item.startsWith(id + " - ")) {
-                comboBox.setSelectedIndex(i);
-                break;
+    private void autoFillCarFromRental() {
+        try {
+            Object selectedItem = cmbRentalId.getSelectedItem();
+
+            // Check if selection is null or is the default option
+            if (selectedItem == null) {
+                return;
             }
+
+            String selectedRental = selectedItem.toString();
+
+            if (selectedRental.equals("Select Rental")) {
+                return;
+            }
+
+            // Extract car_id from "2 - Alex Johnson - Toyota Camry : 5"
+            if (selectedRental.contains(" : ")) {
+                String[] parts = selectedRental.split(" : ");
+                if (parts.length == 2) {
+                    int carId = Integer.parseInt(parts[1].trim());
+
+                    // Find and select this car in the car combo box
+                    for (int i = 0; i < cmbCarId.getItemCount(); i++) {
+                        String carItem = cmbCarId.getItemAt(i);
+                        if (carItem.startsWith(carId + " - ")) {
+                            cmbCarId.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            // Silently ignore errors during auto-fill
         }
     }
 
@@ -64,7 +99,6 @@ public class DamagesMgt extends javax.swing.JFrame {
             String[] parts = response.split("\\|", 2);
 
             if (parts[0].equals("SUCCESS") && parts.length > 1) {
-                // Rentals returns just IDs: "SUCCESS|1;2;3;4"
                 String[] rentals = parts[1].split(";");
                 for (String rental : rentals) {
                     cmbRentalId.addItem(rental);
@@ -144,6 +178,11 @@ public class DamagesMgt extends javax.swing.JFrame {
         cmbDamageId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Damage" }));
 
         cmbRentalId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Rental" }));
+        cmbRentalId.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbRentalIdActionPerformed(evt);
+            }
+        });
 
         cmbCarId.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select Car" }));
 
@@ -294,10 +333,11 @@ public class DamagesMgt extends javax.swing.JFrame {
                 return;
             }
 
-            // Rental ID is just a number (no splitting needed)
-            int rentalId = Integer.parseInt(selectedRental);
-            // Car ID needs splitting: "5 - Toyota Camry"
-            int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+            // Extract rental_id from "2 - Alex Johnson - Toyota Camry : 5"
+            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0].trim());
+
+            // Extract car_id from "5 - Toyota Camry"
+            int carId = Integer.parseInt(selectedCar.split(" - ")[0].trim());
 
             String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
 
@@ -336,34 +376,35 @@ public class DamagesMgt extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Please select a damage!");
                 return;
             }
-
-            // Extract damage_id from "5 - Reported"
             int damageId = Integer.parseInt(selected.split(" - ")[0]);
-
-            // Send FIND request
             String response = ServerConnection.getInstance().sendRequest("FIND|Damages|" + damageId);
-            System.out.println("Server response: " + response); // Debug
+
+            if (response == null || response.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No response from server!");
+                return;
+            }
+
+            if (!response.contains("|")) {
+                JOptionPane.showMessageDialog(this, "Invalid server response format: " + response);
+                return;
+            }
 
             String[] parts = response.split("\\|", 2);
 
             if (parts[0].equals("SUCCESS")) {
-                /*
-                Server returns: "SUCCESS|rental_id|car_id|description|repair_cost|reported_date|status"
-                Example: "SUCCESS|10|5|Broken mirror|50000.00|2024-10-27|Reported"
-                 */
-                String[] fields = parts[1].split("\\|");
-
-                System.out.println("Number of fields: " + fields.length); // Debug
-                for (int i = 0; i < fields.length; i++) {
-                    System.out.println("Field " + i + ": " + fields[i]); // Debug
+                if (parts.length < 2 || parts[1].isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Server returned empty data!");
+                    return;
                 }
+
+                String[] fields = parts[1].split("\\|");
 
                 if (fields.length >= 6) {
                     // Find and select rental ID
                     int rentalId = Integer.parseInt(fields[0]);
                     for (int i = 0; i < cmbRentalId.getItemCount(); i++) {
                         String item = cmbRentalId.getItemAt(i);
-                        if (item.equals(String.valueOf(rentalId))) {
+                        if (item.startsWith(rentalId + " - ")) {
                             cmbRentalId.setSelectedIndex(i);
                             break;
                         }
@@ -379,34 +420,29 @@ public class DamagesMgt extends javax.swing.JFrame {
                         }
                     }
 
-                    // Set description (restore any pipe characters)
+                    // Set fields
                     txtDescription.setText(fields[2].replace("¦", "|"));
-
-                    // Set repair cost (may be empty for NULL)
                     txtRepairCost.setText(fields[3]);
 
-                    // Set reported date
+                    // Set date
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        java.util.Date parsedDate = sdf.parse(fields[4]);
-                        dateReported.setDate(parsedDate);
+                        dateReported.setDate(sdf.parse(fields[4]));
                     } catch (Exception dateEx) {
                         dateReported.setDate(null);
-                        System.err.println("Date parsing error: " + dateEx.getMessage());
                     }
 
-                    // Set status
                     cmbStatus.setSelectedItem(fields[5]);
-
                     JOptionPane.showMessageDialog(this, "Record found!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Incomplete data received! Expected 6 fields, got " + fields.length);
+                    JOptionPane.showMessageDialog(this, "Incomplete data! Expected 6 fields, got " + fields.length);
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
+                String errorMsg = parts.length > 1 ? parts[1] : "Unknown error";
+                JOptionPane.showMessageDialog(this, "Error: " + errorMsg);
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error finding damage: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             ex.printStackTrace();
         }
     }//GEN-LAST:event_btnFindActionPerformed
@@ -429,19 +465,24 @@ public class DamagesMgt extends javax.swing.JFrame {
             }
 
             int damageId = Integer.parseInt(selected.split(" - ")[0]);
-            int rentalId = Integer.parseInt(selectedRental);  // No splitting - just a number
-            int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+
+            // Extract rental_id from "2 - Alex Johnson - Toyota Camry : 5"
+            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0].trim());
+
+            // Extract car_id from "5 - Toyota Camry"
+            int carId = Integer.parseInt(selectedCar.split(" - ")[0].trim());
 
             String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
             String repairCost = txtRepairCost.getText().trim();
 
-            // Data format: damage_id,rental_id,car_id,description,repair_cost,reported_date,status
-            String damageData = damageId + ","
-                    + rentalId + ","
-                    + carId + ","
-                    + txtDescription.getText() + ","
-                    + repairCost + ","
-                    + reportedDate + ","
+            // Data format: damage_id|rental_id|car_id|description|repair_cost|reported_date|status
+            // Using PIPE delimiter (changed from comma)
+            String damageData = damageId + "|"
+                    + rentalId + "|"
+                    + carId + "|"
+                    + txtDescription.getText().replace("|", "¦") + "|" // Replace any pipes in description
+                    + repairCost + "|"
+                    + reportedDate + "|"
                     + cmbStatus.getSelectedItem().toString();
 
             String response = ServerConnection.getInstance().sendRequest("UPDATE|Damages|" + damageData);
@@ -456,6 +497,7 @@ public class DamagesMgt extends javax.swing.JFrame {
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating damage: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
@@ -502,6 +544,10 @@ public class DamagesMgt extends javax.swing.JFrame {
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed
 
+    private void cmbRentalIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRentalIdActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbRentalIdActionPerformed
+
     private void clearFields() {
         cmbDamageId.setSelectedIndex(0);
         cmbRentalId.setSelectedIndex(0);
@@ -542,6 +588,7 @@ public class DamagesMgt extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new DamagesMgt().setVisible(true);
             }
