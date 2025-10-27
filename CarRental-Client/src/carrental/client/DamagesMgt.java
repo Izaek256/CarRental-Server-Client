@@ -41,9 +41,11 @@ public class DamagesMgt extends javax.swing.JFrame {
             cmbDamageId.removeAllItems();
             cmbDamageId.addItem("Select Damage");
 
-            String response = ServerConnection.getInstance().sendRequest("LIST|Damages");
-            if (response.startsWith("SUCCESS|")) {
-                String[] damages = response.substring(8).split(";");
+            String response = ServerConnection.getInstance().sendRequest("LIST|Damages|");
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] damages = parts[1].split(";");
                 for (String damage : damages) {
                     cmbDamageId.addItem(damage);
                 }
@@ -58,9 +60,12 @@ public class DamagesMgt extends javax.swing.JFrame {
             cmbRentalId.removeAllItems();
             cmbRentalId.addItem("Select Rental");
 
-            String response = ServerConnection.getInstance().sendRequest("LIST|Rentals");
-            if (response.startsWith("SUCCESS|")) {
-                String[] rentals = response.substring(8).split(";");
+            String response = ServerConnection.getInstance().sendRequest("LIST|Rentals|");
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                // Rentals returns just IDs: "SUCCESS|1;2;3;4"
+                String[] rentals = parts[1].split(";");
                 for (String rental : rentals) {
                     cmbRentalId.addItem(rental);
                 }
@@ -75,9 +80,11 @@ public class DamagesMgt extends javax.swing.JFrame {
             cmbCarId.removeAllItems();
             cmbCarId.addItem("Select Car");
 
-            String response = ServerConnection.getInstance().sendRequest("LIST|Cars");
-            if (response.startsWith("SUCCESS|")) {
-                String[] cars = response.substring(8).split(";");
+            String response = ServerConnection.getInstance().sendRequest("LIST|Cars|");
+            String[] parts = response.split("\\|", 2);
+
+            if (parts[0].equals("SUCCESS") && parts.length > 1) {
+                String[] cars = parts[1].split(";");
                 for (String car : cars) {
                     cmbCarId.addItem(car);
                 }
@@ -287,25 +294,38 @@ public class DamagesMgt extends javax.swing.JFrame {
                 return;
             }
 
-            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0]);
+            // Rental ID is just a number (no splitting needed)
+            int rentalId = Integer.parseInt(selectedRental);
+            // Car ID needs splitting: "5 - Toyota Camry"
             int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
-            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
-            String repairCost = txtRepairCost.getText().isEmpty() ? "0" : txtRepairCost.getText();
 
-            String damageData = rentalId + "," + carId + "," + txtDescription.getText() + ","
-                    + repairCost + "," + reportedDate + "," + cmbStatus.getSelectedItem().toString();
+            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
+
+            // Send empty string for NULL repair cost
+            String repairCost = txtRepairCost.getText().trim();
+
+            // Data format: rental_id|car_id|description|repair_cost|reported_date|status
+            // Using PIPE delimiter to avoid conflicts with commas in description
+            String damageData = rentalId + "|"
+                    + carId + "|"
+                    + txtDescription.getText().replace("|", "¦") + "|" // Replace any pipes in description
+                    + repairCost + "|"
+                    + reportedDate + "|"
+                    + cmbStatus.getSelectedItem().toString();
 
             String response = ServerConnection.getInstance().sendRequest("ADD|Damages|" + damageData);
+            String[] parts = response.split("\\|", 2);
 
-            if (response.startsWith("SUCCESS|")) {
-                JOptionPane.showMessageDialog(this, "Damage Record Added Successfully!");
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
                 loadDamageIds();
                 clearFields();
             } else {
-                JOptionPane.showMessageDialog(this, "Error adding damage: " + response);
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding damage: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -313,68 +333,81 @@ public class DamagesMgt extends javax.swing.JFrame {
         try {
             String selected = cmbDamageId.getSelectedItem().toString();
             if (selected.equals("Select Damage")) {
-                JOptionPane.showMessageDialog(this, "Please select a damage record!");
+                JOptionPane.showMessageDialog(this, "Please select a damage!");
                 return;
             }
 
+            // Extract damage_id from "5 - Reported"
             int damageId = Integer.parseInt(selected.split(" - ")[0]);
+
+            // Send FIND request
             String response = ServerConnection.getInstance().sendRequest("FIND|Damages|" + damageId);
+            System.out.println("Server response: " + response); // Debug
 
-            if (response.startsWith("SUCCESS|")) {
-                String[] data = response.substring(8).split(",");
+            String[] parts = response.split("\\|", 2);
 
-                // Clear form first
-                clearFields();
+            if (parts[0].equals("SUCCESS")) {
+                /*
+                Server returns: "SUCCESS|rental_id|car_id|description|repair_cost|reported_date|status"
+                Example: "SUCCESS|10|5|Broken mirror|50000.00|2024-10-27|Reported"
+                 */
+                String[] fields = parts[1].split("\\|");
 
-                // Process each field
-                for (int i = 0; i < data.length; i++) {
-                    String field = data[i];
-                    if (field == null || field.isEmpty() || field.equals("null")) {
-                        continue;
-                    }
-
-                    switch (i) {
-                        case 0: // rental_id
-                            try {
-                                int rentalId = Integer.parseInt(field);
-                                selectItemInComboBox(cmbRentalId, rentalId);
-                            } catch (NumberFormatException e) {
-                            }
-                            break;
-                        case 1: // car_id
-                            try {
-                                int carId = Integer.parseInt(field);
-                                selectItemInComboBox(cmbCarId, carId);
-                            } catch (NumberFormatException e) {
-                            }
-                            break;
-                        case 2: // description
-                            txtDescription.setText(field);
-                            break;
-                        case 3: // repair_cost
-                            if (!field.equals("0")) {
-                                txtRepairCost.setText(field);
-                            }
-                            break;
-                        case 4: // reported_date
-                            try {
-                                dateReported.setDate(java.sql.Date.valueOf(field));
-                            } catch (Exception e) {
-                            }
-                            break;
-                        case 5: // status
-                            cmbStatus.setSelectedItem(field);
-                            break;
-                    }
+                System.out.println("Number of fields: " + fields.length); // Debug
+                for (int i = 0; i < fields.length; i++) {
+                    System.out.println("Field " + i + ": " + fields[i]); // Debug
                 }
 
-                JOptionPane.showMessageDialog(this, "Damage data loaded successfully!");
+                if (fields.length >= 6) {
+                    // Find and select rental ID
+                    int rentalId = Integer.parseInt(fields[0]);
+                    for (int i = 0; i < cmbRentalId.getItemCount(); i++) {
+                        String item = cmbRentalId.getItemAt(i);
+                        if (item.equals(String.valueOf(rentalId))) {
+                            cmbRentalId.setSelectedIndex(i);
+                            break;
+                        }
+                    }
 
+                    // Find and select car ID
+                    int carId = Integer.parseInt(fields[1]);
+                    for (int i = 0; i < cmbCarId.getItemCount(); i++) {
+                        String item = cmbCarId.getItemAt(i);
+                        if (item.startsWith(carId + " - ")) {
+                            cmbCarId.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+
+                    // Set description (restore any pipe characters)
+                    txtDescription.setText(fields[2].replace("¦", "|"));
+
+                    // Set repair cost (may be empty for NULL)
+                    txtRepairCost.setText(fields[3]);
+
+                    // Set reported date
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        java.util.Date parsedDate = sdf.parse(fields[4]);
+                        dateReported.setDate(parsedDate);
+                    } catch (Exception dateEx) {
+                        dateReported.setDate(null);
+                        System.err.println("Date parsing error: " + dateEx.getMessage());
+                    }
+
+                    // Set status
+                    cmbStatus.setSelectedItem(fields[5]);
+
+                    JOptionPane.showMessageDialog(this, "Record found!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Incomplete data received! Expected 6 fields, got " + fields.length);
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Damage record not found: " + response);
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error finding damage: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btnFindActionPerformed
 
@@ -396,22 +429,30 @@ public class DamagesMgt extends javax.swing.JFrame {
             }
 
             int damageId = Integer.parseInt(selected.split(" - ")[0]);
-            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0]);
+            int rentalId = Integer.parseInt(selectedRental);  // No splitting - just a number
             int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
-            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
-            String repairCost = txtRepairCost.getText().isEmpty() ? "0" : txtRepairCost.getText();
 
-            String damageData = damageId + "," + rentalId + "," + carId + "," + txtDescription.getText() + ","
-                    + repairCost + "," + reportedDate + "," + cmbStatus.getSelectedItem().toString();
+            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
+            String repairCost = txtRepairCost.getText().trim();
+
+            // Data format: damage_id,rental_id,car_id,description,repair_cost,reported_date,status
+            String damageData = damageId + ","
+                    + rentalId + ","
+                    + carId + ","
+                    + txtDescription.getText() + ","
+                    + repairCost + ","
+                    + reportedDate + ","
+                    + cmbStatus.getSelectedItem().toString();
 
             String response = ServerConnection.getInstance().sendRequest("UPDATE|Damages|" + damageData);
+            String[] parts = response.split("\\|", 2);
 
-            if (response.startsWith("SUCCESS|")) {
-                JOptionPane.showMessageDialog(this, "Damage Record Updated Successfully!");
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
                 loadDamageIds();
                 clearFields();
             } else {
-                JOptionPane.showMessageDialog(this, "Error updating damage: " + response);
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating damage: " + ex.getMessage());
@@ -429,19 +470,23 @@ public class DamagesMgt extends javax.swing.JFrame {
             int damageId = Integer.parseInt(selected.split(" - ")[0]);
 
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to delete this damage record?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                    "Are you sure you want to delete this damage record?",
+                    "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
+
             if (confirm != JOptionPane.YES_OPTION) {
                 return;
             }
 
             String response = ServerConnection.getInstance().sendRequest("DELETE|Damages|" + damageId);
+            String[] parts = response.split("\\|", 2);
 
-            if (response.startsWith("SUCCESS|")) {
-                JOptionPane.showMessageDialog(this, "Damage Record Deleted Successfully!");
+            if (parts[0].equals("SUCCESS")) {
+                JOptionPane.showMessageDialog(this, parts[1]);
                 loadDamageIds();
                 clearFields();
             } else {
-                JOptionPane.showMessageDialog(this, "Error deleting damage: " + response);
+                JOptionPane.showMessageDialog(this, "Error: " + parts[1]);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting damage: " + ex.getMessage());
