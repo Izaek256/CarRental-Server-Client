@@ -22,24 +22,29 @@ public class CustomerManagement extends javax.swing.JFrame {
         setSize(900, 900);
         setLocationRelativeTo(null);
         loadCustomers();
+        clearFields();
     }
-
+    
+    private void clearFields() {
+        txtFirstnameField.setText("");
+        txtLastnameField.setText("");
+        txtEmailField.setText("");
+        txtPhonenumberField.setText("");
+        txtAddressField.setText("");
+        txtLicenseNumber.setText("");
+    }
     private void loadCustomers() {
         try {
-            // Use your existing connection method
-            Connection conn = DbConnection.getConnection();
-
-            String sql = "SELECT customer_id, first_name, last_name FROM customers ORDER BY customer_id ASC";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            ResultSet rs = pst.executeQuery();
-
             CustomerCmbBox.removeAllItems();
             CustomerCmbBox.addItem("-- Select Customer ID --");
 
-            while (rs.next()) {
-                CustomerCmbBox.addItem(rs.getInt("customer_id") + " - " + rs.getString("first_name") + " " + rs.getString("last_name"));
+            String response = ServerConnection.getInstance().sendRequest("LIST|Customers");
+            if (response.startsWith("SUCCESS|")) {
+                String[] customers = response.substring(8).split(";");
+                for (String customer : customers) {
+                    CustomerCmbBox.addItem(customer);
+                }
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading customer IDs: " + e.getMessage());
         }
@@ -222,19 +227,32 @@ public class CustomerManagement extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE Customers SET first_name=?, last_name=?, email=?, phone_number=?, address=? WHERE customer_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-
-            pst.setString(1, txtFirstnameField.getText());
-            pst.setString(2, txtLastnameField.getText());
-            pst.setString(3, txtEmailField.getText());
-            pst.setString(4, txtPhonenumberField.getText());
-            pst.setString(5, txtAddressField.getText());
-
-            pst.setInt(6, Integer.parseInt(((String) CustomerCmbBox.getSelectedItem()).split("-")[0].trim()));
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Customer Updated!");
+        try {
+            String selectedItem = (String) CustomerCmbBox.getSelectedItem();
+            if (selectedItem == null || selectedItem.equals("-- Select Customer ID --")) {
+                JOptionPane.showMessageDialog(this, "Please select a customer to update.");
+                return;
+            }
+            
+            int customerId = Integer.parseInt(selectedItem.split(" - ")[0].trim());
+            
+            String customerData = customerId + "," +
+                                txtFirstnameField.getText() + "," +
+                                txtLastnameField.getText() + "," +
+                                txtEmailField.getText() + "," +
+                                txtPhonenumberField.getText() + "," +
+                                txtAddressField.getText() + "," +
+                                txtLicenseNumber.getText();
+            
+            String response = ServerConnection.getInstance().sendRequest("UPDATE|Customers|" + customerData);
+            
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Customer Updated!");
+                loadCustomers();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating customer: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating customer: " + ex.getMessage());
         }
@@ -242,69 +260,72 @@ public class CustomerManagement extends javax.swing.JFrame {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO Customers(first_name, last_name, email, phone_number, address, license_number) VALUES(?, ?, ?, ?, ?, ?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, txtFirstnameField.getText());
-            pst.setString(2, txtLastnameField.getText());
-            pst.setString(3, txtEmailField.getText());
-            pst.setString(4, txtPhonenumberField.getText());
-            pst.setString(5, txtAddressField.getText());
-            pst.setString(6, txtLicenseNumber.getText());
-            pst.executeUpdate();
-
-            JOptionPane.showMessageDialog(this, "Customer Added!");
-
+       try {
+            String customerData = txtFirstnameField.getText() + "," +
+                                txtLastnameField.getText() + "," +
+                                txtEmailField.getText() + "," +
+                                txtPhonenumberField.getText() + "," +
+                                txtAddressField.getText() + "," +
+                                txtLicenseNumber.getText();
+            
+            String response = ServerConnection.getInstance().sendRequest("ADD|Customers|" + customerData);
+            
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Customer Added!");
+                loadCustomers();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error adding customer: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding customer: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        try (Connection conn = DbConnection.getConnection()) {
+        try {
             String selectedItem = (String) CustomerCmbBox.getSelectedItem();
-
-            if (selectedItem == null || selectedItem.equals("-- Select Customer --")) {
+            if (selectedItem == null || selectedItem.equals("-- Select Customer ID --")) {
                 JOptionPane.showMessageDialog(this, "Please select a customer to delete.");
                 return;
             }
+            
             int customerId = Integer.parseInt(selectedItem.split(" - ")[0].trim());
-            String sql = "DELETE FROM Customers WHERE customer_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, customerId);
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Customer deleted successfully!");
-            loadCustomers();
-            txtFirstnameField.setText("");
-            txtLastnameField.setText("");
-            txtEmailField.setText("");
-            txtPhonenumberField.setText("");
-            txtAddressField.setText("");
+            
+            String response = ServerConnection.getInstance().sendRequest("DELETE|Customers|" + customerId);
+            
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Customer deleted successfully!");
+                loadCustomers();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error deleting customer: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting customer: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindActionPerformed
-        try (Connection conn = DbConnection.getConnection()) {
+        try {
             String selectedItem = (String) CustomerCmbBox.getSelectedItem();
-
-            if (selectedItem == null || selectedItem.equals("-- Select Customer --")) {
+            if (selectedItem == null || selectedItem.equals("-- Select Customer ID --")) {
                 JOptionPane.showMessageDialog(this, "Please select a customer.");
                 return;
             }
+            
             int customerId = Integer.parseInt(selectedItem.split(" - ")[0].trim());
-            String sql = "SELECT * FROM Customers WHERE customer_id = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, customerId);
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                txtFirstnameField.setText(rs.getString("first_name"));
-                txtLastnameField.setText(rs.getString("last_name"));
-                txtEmailField.setText(rs.getString("email"));
-                txtPhonenumberField.setText(rs.getString("phone_number"));
-                txtAddressField.setText(rs.getString("address"));
+            
+            String response = ServerConnection.getInstance().sendRequest("FIND|Customers|" + customerId);
+            
+            if (response.startsWith("SUCCESS|")) {
+                String[] data = response.substring(8).split(",");
+                txtFirstnameField.setText(data[0]);
+                txtLastnameField.setText(data[1]);
+                txtEmailField.setText(data[2]);
+                txtPhonenumberField.setText(data[3]);
+                txtAddressField.setText(data[4]);
+                txtLicenseNumber.setText(data[5]);
             } else {
                 JOptionPane.showMessageDialog(this, "Customer not found!");
             }
@@ -315,12 +336,7 @@ public class CustomerManagement extends javax.swing.JFrame {
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         // TODO add your handling code here:
-        loadCustomers();
-        txtFirstnameField.setText("");
-        txtLastnameField.setText("");
-        txtEmailField.setText("");
-        txtPhonenumberField.setText("");
-        txtAddressField.setText("");
+        clearFields();
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed

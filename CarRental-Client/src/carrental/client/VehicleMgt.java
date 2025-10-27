@@ -4,7 +4,6 @@
  */
 package carrental.client;
 
-import java.sql.*;
 import javax.swing.*;
 
 /**
