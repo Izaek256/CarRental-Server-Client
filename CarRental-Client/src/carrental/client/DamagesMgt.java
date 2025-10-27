@@ -4,6 +4,7 @@
 package carrental.client;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
@@ -25,61 +26,62 @@ public class DamagesMgt extends javax.swing.JFrame {
         loadCarIds();
     }
 
-    private void loadDamageIds() {
-        cmbDamageId.removeAllItems();
-        cmbDamageId.addItem("Select Damage");
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT damage_id, status FROM damages ORDER BY damage_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int damageId = rs.getInt("damage_id");
-                String status = rs.getString("status");
-                cmbDamageId.addItem(damageId + " - " + status);
+    private void selectItemInComboBox(JComboBox<String> comboBox, int id) {
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            String item = comboBox.getItemAt(i);
+            if (item.startsWith(id + " - ")) {
+                comboBox.setSelectedIndex(i);
+                break;
             }
+        }
+    }
 
+    private void loadDamageIds() {
+        try {
+            cmbDamageId.removeAllItems();
+            cmbDamageId.addItem("Select Damage");
+
+            String response = ServerConnection.getInstance().sendRequest("LIST|Damages");
+            if (response.startsWith("SUCCESS|")) {
+                String[] damages = response.substring(8).split(";");
+                for (String damage : damages) {
+                    cmbDamageId.addItem(damage);
+                }
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading damage IDs: " + ex.getMessage());
         }
     }
 
     private void loadRentalIds() {
-        cmbRentalId.removeAllItems();
-        cmbRentalId.addItem("Select Rental");
+        try {
+            cmbRentalId.removeAllItems();
+            cmbRentalId.addItem("Select Rental");
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT rental_id FROM rentals ORDER BY rental_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int rentalId = rs.getInt("rental_id");
-                cmbRentalId.addItem(String.valueOf(rentalId));
+            String response = ServerConnection.getInstance().sendRequest("LIST|Rentals");
+            if (response.startsWith("SUCCESS|")) {
+                String[] rentals = response.substring(8).split(";");
+                for (String rental : rentals) {
+                    cmbRentalId.addItem(rental);
+                }
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading rental IDs: " + ex.getMessage());
         }
     }
 
     private void loadCarIds() {
-        cmbCarId.removeAllItems();
-        cmbCarId.addItem("Select Car");
+        try {
+            cmbCarId.removeAllItems();
+            cmbCarId.addItem("Select Car");
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT car_id, make, model FROM Cars ORDER BY car_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int carId = rs.getInt("car_id");
-                String make = rs.getString("make");
-                String model = rs.getString("model");
-                cmbCarId.addItem(carId + " - " + make + " " + model);
+            String response = ServerConnection.getInstance().sendRequest("LIST|Cars");
+            if (response.startsWith("SUCCESS|")) {
+                String[] cars = response.substring(8).split(";");
+                for (String car : cars) {
+                    cmbCarId.addItem(car);
+                }
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading car IDs: " + ex.getMessage());
         }
@@ -275,91 +277,101 @@ public class DamagesMgt extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        String selectedRental = cmbRentalId.getSelectedItem().toString();
-        String selectedCar = cmbCarId.getSelectedItem().toString();
+        try {
+            String selectedRental = cmbRentalId.getSelectedItem().toString();
+            String selectedCar = cmbCarId.getSelectedItem().toString();
 
-        if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car") || 
-            txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all required fields!");
-            return;
-        }
-
-        int rentalId = Integer.parseInt(selectedRental);
-        int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO damages(rental_id, car_id, description, repair_cost, reported_date, status) VALUES (?,?,?,?,?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, rentalId);
-            pst.setInt(2, carId);
-            pst.setString(3, txtDescription.getText());
-            
-            if (txtRepairCost.getText().isEmpty()) {
-                pst.setNull(4, java.sql.Types.DECIMAL);
-            } else {
-                pst.setDouble(4, Double.parseDouble(txtRepairCost.getText()));
+            if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car")
+                    || txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
             }
-            
-            pst.setDate(5, new java.sql.Date(dateReported.getDate().getTime()));
-            pst.setString(6, cmbStatus.getSelectedItem().toString());
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Damage Record Added Successfully!");
-            loadDamageIds();
-            clearFields();
+            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0]);
+            int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
+            String repairCost = txtRepairCost.getText().isEmpty() ? "0" : txtRepairCost.getText();
 
+            String damageData = rentalId + "," + carId + "," + txtDescription.getText() + ","
+                    + repairCost + "," + reportedDate + "," + cmbStatus.getSelectedItem().toString();
+
+            String response = ServerConnection.getInstance().sendRequest("ADD|Damages|" + damageData);
+
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Damage Record Added Successfully!");
+                loadDamageIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error adding damage: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindActionPerformed
-        String selected = cmbDamageId.getSelectedItem().toString();
-        if (selected.equals("Select Damage")) {
-            JOptionPane.showMessageDialog(this, "Please select a damage record!");
-            return;
-        }
+        try {
+            String selected = cmbDamageId.getSelectedItem().toString();
+            if (selected.equals("Select Damage")) {
+                JOptionPane.showMessageDialog(this, "Please select a damage record!");
+                return;
+            }
 
-        int damageId = Integer.parseInt(selected.split(" - ")[0]);
+            int damageId = Integer.parseInt(selected.split(" - ")[0]);
+            String response = ServerConnection.getInstance().sendRequest("FIND|Damages|" + damageId);
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT * FROM damages WHERE damage_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, damageId);
-            ResultSet rs = pst.executeQuery();
+            if (response.startsWith("SUCCESS|")) {
+                String[] data = response.substring(8).split(",");
 
-            if (rs.next()) {
-                // Find and select rental
-                int rentalId = rs.getInt("rental_id");
-                for (int i = 0; i < cmbRentalId.getItemCount(); i++) {
-                    if (cmbRentalId.getItemAt(i).equals(String.valueOf(rentalId))) {
-                        cmbRentalId.setSelectedIndex(i);
-                        break;
+                // Clear form first
+                clearFields();
+
+                // Process each field
+                for (int i = 0; i < data.length; i++) {
+                    String field = data[i];
+                    if (field == null || field.isEmpty() || field.equals("null")) {
+                        continue;
+                    }
+
+                    switch (i) {
+                        case 0: // rental_id
+                            try {
+                                int rentalId = Integer.parseInt(field);
+                                selectItemInComboBox(cmbRentalId, rentalId);
+                            } catch (NumberFormatException e) {
+                            }
+                            break;
+                        case 1: // car_id
+                            try {
+                                int carId = Integer.parseInt(field);
+                                selectItemInComboBox(cmbCarId, carId);
+                            } catch (NumberFormatException e) {
+                            }
+                            break;
+                        case 2: // description
+                            txtDescription.setText(field);
+                            break;
+                        case 3: // repair_cost
+                            if (!field.equals("0")) {
+                                txtRepairCost.setText(field);
+                            }
+                            break;
+                        case 4: // reported_date
+                            try {
+                                dateReported.setDate(java.sql.Date.valueOf(field));
+                            } catch (Exception e) {
+                            }
+                            break;
+                        case 5: // status
+                            cmbStatus.setSelectedItem(field);
+                            break;
                     }
                 }
 
-                // Find and select car
-                int carId = rs.getInt("car_id");
-                for (int i = 0; i < cmbCarId.getItemCount(); i++) {
-                    if (cmbCarId.getItemAt(i).startsWith(carId + " - ")) {
-                        cmbCarId.setSelectedIndex(i);
-                        break;
-                    }
-                }
+                JOptionPane.showMessageDialog(this, "Damage data loaded successfully!");
 
-                txtDescription.setText(rs.getString("description"));
-                
-                double repairCost = rs.getDouble("repair_cost");
-                if (!rs.wasNull()) {
-                    txtRepairCost.setText(String.valueOf(repairCost));
-                } else {
-                    txtRepairCost.setText("");
-                }
-                
-                dateReported.setDate(rs.getDate("reported_date"));
-                cmbStatus.setSelectedItem(rs.getString("status"));
             } else {
-                JOptionPane.showMessageDialog(this, "Damage record not found!");
+                JOptionPane.showMessageDialog(this, "Damage record not found: " + response);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error finding damage: " + ex.getMessage());
@@ -367,75 +379,70 @@ public class DamagesMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFindActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        String selected = cmbDamageId.getSelectedItem().toString();
-        if (selected.equals("Select Damage")) {
-            JOptionPane.showMessageDialog(this, "Please select a damage record!");
-            return;
-        }
-
-        String selectedRental = cmbRentalId.getSelectedItem().toString();
-        String selectedCar = cmbCarId.getSelectedItem().toString();
-
-        if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car") || 
-            txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all required fields!");
-            return;
-        }
-
-        int damageId = Integer.parseInt(selected.split(" - ")[0]);
-        int rentalId = Integer.parseInt(selectedRental);
-        int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE damages SET rental_id=?, car_id=?, description=?, repair_cost=?, reported_date=?, status=? WHERE damage_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, rentalId);
-            pst.setInt(2, carId);
-            pst.setString(3, txtDescription.getText());
-            
-            if (txtRepairCost.getText().isEmpty()) {
-                pst.setNull(4, java.sql.Types.DECIMAL);
-            } else {
-                pst.setDouble(4, Double.parseDouble(txtRepairCost.getText()));
+        try {
+            String selected = cmbDamageId.getSelectedItem().toString();
+            if (selected.equals("Select Damage")) {
+                JOptionPane.showMessageDialog(this, "Please select a damage record!");
+                return;
             }
-            
-            pst.setDate(5, new java.sql.Date(dateReported.getDate().getTime()));
-            pst.setString(6, cmbStatus.getSelectedItem().toString());
-            pst.setInt(7, damageId);
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Damage Record Updated Successfully!");
-            loadDamageIds();
-            clearFields();
+            String selectedRental = cmbRentalId.getSelectedItem().toString();
+            String selectedCar = cmbCarId.getSelectedItem().toString();
 
+            if (selectedRental.equals("Select Rental") || selectedCar.equals("Select Car")
+                    || txtDescription.getText().isEmpty() || dateReported.getDate() == null) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
+            }
+
+            int damageId = Integer.parseInt(selected.split(" - ")[0]);
+            int rentalId = Integer.parseInt(selectedRental.split(" - ")[0]);
+            int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+            String reportedDate = new SimpleDateFormat("yyyy-MM-dd").format(dateReported.getDate());
+            String repairCost = txtRepairCost.getText().isEmpty() ? "0" : txtRepairCost.getText();
+
+            String damageData = damageId + "," + rentalId + "," + carId + "," + txtDescription.getText() + ","
+                    + repairCost + "," + reportedDate + "," + cmbStatus.getSelectedItem().toString();
+
+            String response = ServerConnection.getInstance().sendRequest("UPDATE|Damages|" + damageData);
+
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Damage Record Updated Successfully!");
+                loadDamageIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating damage: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating damage: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        String selected = cmbDamageId.getSelectedItem().toString();
-        if (selected.equals("Select Damage")) {
-            JOptionPane.showMessageDialog(this, "Please select a damage record!");
-            return;
-        }
+        try {
+            String selected = cmbDamageId.getSelectedItem().toString();
+            if (selected.equals("Select Damage")) {
+                JOptionPane.showMessageDialog(this, "Please select a damage record!");
+                return;
+            }
 
-        int damageId = Integer.parseInt(selected.split(" - ")[0]);
+            int damageId = Integer.parseInt(selected.split(" - ")[0]);
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this damage record?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) {
-            return;
-        }
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this damage record?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "DELETE FROM damages WHERE damage_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, damageId);
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Damage Record Deleted Successfully!");
-            loadDamageIds();
-            clearFields();
+            String response = ServerConnection.getInstance().sendRequest("DELETE|Damages|" + damageId);
 
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Damage Record Deleted Successfully!");
+                loadDamageIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error deleting damage: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error deleting damage: " + ex.getMessage());
         }

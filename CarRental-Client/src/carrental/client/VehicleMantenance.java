@@ -5,6 +5,7 @@
 package carrental.client;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
@@ -22,19 +23,27 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }
 
     private void loadCars() {
-        try (Connection conn = DbConnection.getConnection()) {
+        try {
             CarComboBox.removeAllItems();
             CarComboBox.addItem("Select Car");
-            ResultSet rs = conn.createStatement().executeQuery("SELECT car_id, make, model, license_plate FROM Cars");
-            while (rs.next()) {
-                CarComboBox.addItem(rs.getInt("car_id") + " - "
-                        + rs.getString("make") + " "
-                        + rs.getString("model") + " ("
-                        + rs.getString("license_plate") + ")");
+
+            String response = ServerConnection.getInstance().sendRequest("LIST|Cars");
+            if (response.startsWith("SUCCESS|")) {
+                String[] cars = response.substring(8).split(";");
+                for (String car : cars) {
+                    CarComboBox.addItem(car);
+                }
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading cars: " + ex.getMessage());
         }
+    }
+    private void clearForm() {
+        CarComboBox.setSelectedIndex(0);
+        txtDescriptionField.setText("");
+        txtMaintenanceId.setText("");
+        ServiceDateChooser.setDate(null);
+        txtMaintenanceId.setText("");
     }
 
     /**
@@ -176,68 +185,77 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
-        try (Connection conn = DbConnection.getConnection()) {
-            int carId = Integer.parseInt(CarComboBox.getSelectedItem().toString().split(" - ")[0]);
+        try {
+            String carStr = CarComboBox.getSelectedItem().toString();
+            if (carStr.equals("Select Car")) {
+                JOptionPane.showMessageDialog(this, "Please select a car!");
+                return;
+            }
+
+            int carId = Integer.parseInt(carStr.split(" - ")[0]);
             String description = txtDescriptionField.getText();
             double cost = Double.parseDouble(txtCostField.getText());
             java.util.Date utilDate = ServiceDateChooser.getDate();
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+            String sqlDate = new SimpleDateFormat("yyyy-MM-dd").format(utilDate);
 
-            String sql = "INSERT INTO VehicleMaintenance (car_id, service_date, description, cost) VALUES (?, ?, ?, ?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setDate(2, sqlDate);
-            pst.setString(3, description);
-            pst.setDouble(4, cost);
+            String maintenanceData = carId + "," + sqlDate + "," + description + "," + cost;
+            String response = ServerConnection.getInstance().sendRequest("ADD|VehicleMaintenance|" + maintenanceData);
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Maintenance record added!");
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Maintenance record added!");
+                clearForm();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error adding maintenance: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding maintenance: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        // TODO add your handling code here:
+        try {
+            int maintenanceId = Integer.parseInt(txtMaintenanceId.getText());
+            String carStr = CarComboBox.getSelectedItem().toString();
+            if (carStr.equals("Select Car")) {
+                JOptionPane.showMessageDialog(this, "Please select a car!");
+                return;
+            }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            int maintenanceId = Integer.parseInt(txtMaintenanceId.getText()); // hidden or input field
-            int carId = Integer.parseInt(CarComboBox.getSelectedItem().toString().split(" - ")[0]);
+            int carId = Integer.parseInt(carStr.split(" - ")[0]);
             String description = txtDescriptionField.getText();
             double cost = Double.parseDouble(txtCostField.getText());
             java.util.Date utilDate = ServiceDateChooser.getDate();
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+            String sqlDate = new SimpleDateFormat("yyyy-MM-dd").format(utilDate);
 
-            String sql = "UPDATE VehicleMaintenance SET car_id=?, service_date=?, description=?, cost=? WHERE maintenance_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setDate(2, sqlDate);
-            pst.setString(3, description);
-            pst.setDouble(4, cost);
-            pst.setInt(5, maintenanceId);
+            String maintenanceData = maintenanceId + "," + carId + "," + sqlDate + "," + description + "," + cost;
+            String response = ServerConnection.getInstance().sendRequest("UPDATE|VehicleMaintenance|" + maintenanceData);
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Maintenance record updated!");
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Maintenance record updated!");
+                clearForm();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error updating maintenance: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error updating maintenance: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        try (Connection conn = DbConnection.getConnection()) {
-        int maintenanceId = Integer.parseInt(txtMaintenanceId.getText()); // hidden or input field
+        try {
+            int maintenanceId = Integer.parseInt(txtMaintenanceId.getText());
 
-        String sql = "DELETE FROM VehicleMaintenance WHERE maintenance_id=?";
-        PreparedStatement pst = conn.prepareStatement(sql);
-        pst.setInt(1, maintenanceId);
-        pst.executeUpdate();
+            String response = ServerConnection.getInstance().sendRequest("DELETE|VehicleMaintenance|" + maintenanceId);
 
-        JOptionPane.showMessageDialog(this, "Maintenance record deleted!");
-    } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this, "Error deleting maintenance: " + ex.getMessage());
-    }
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Maintenance record deleted!");
+                clearForm();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error deleting maintenance: " + response);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error deleting maintenance: " + ex.getMessage());
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
@@ -299,4 +317,5 @@ public class VehicleMantenance extends javax.swing.JFrame {
     private javax.swing.JTextArea txtDescriptionField;
     private javax.swing.JTextField txtMaintenanceId;
     // End of variables declaration//GEN-END:variables
+
 }

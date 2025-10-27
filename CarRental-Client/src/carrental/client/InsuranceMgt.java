@@ -4,6 +4,7 @@
 package carrental.client;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
@@ -24,42 +25,56 @@ public class InsuranceMgt extends javax.swing.JFrame {
         loadCarIds();
     }
 
-    private void loadInsuranceIds() {
-        cmbInsuranceId.removeAllItems();
-        cmbInsuranceId.addItem("Select Insurance");
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT insurance_id, policy_number FROM insurance ORDER BY insurance_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int insuranceId = rs.getInt("insurance_id");
-                String policyNumber = rs.getString("policy_number");
-                cmbInsuranceId.addItem(insuranceId + " - " + policyNumber);
+    private void selectItemInComboBox(JComboBox<String> comboBox, int id) {
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            String item = comboBox.getItemAt(i);
+            if (item.startsWith(id + " - ")) {
+                comboBox.setSelectedIndex(i);
+                break;
             }
+        }
+    }
+    private void clearFields() {
+        cmbInsuranceId.setSelectedIndex(0);
+        cmbCarId.setSelectedIndex(0);
+        txtPolicyNumber.setText("");
+        txtInsuranceCompany.setText("");
+        txtCoverageAmount.setText("");
+        txtPremiumAmount.setText("");
+        dateStart.setDate(null);
+        dateEnd.setDate(null);
+        cmbStatus.setSelectedIndex(0);
+    }
 
+    private void loadInsuranceIds() {
+        try {
+            cmbInsuranceId.removeAllItems();
+            cmbInsuranceId.addItem("Select Insurance");
+
+            String response = ServerConnection.getInstance().sendRequest("LIST|Insurance");
+            if (response.startsWith("SUCCESS|")) {
+                String[] insurances = response.substring(8).split(";");
+                for (String insurance : insurances) {
+                    cmbInsuranceId.addItem(insurance);
+                }
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading insurance IDs: " + ex.getMessage());
         }
     }
 
     private void loadCarIds() {
-        cmbCarId.removeAllItems();
-        cmbCarId.addItem("Select Car");
+        try {
+            cmbCarId.removeAllItems();
+            cmbCarId.addItem("Select Car");
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT car_id, make, model FROM Cars ORDER BY car_id";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                int carId = rs.getInt("car_id");
-                String make = rs.getString("make");
-                String model = rs.getString("model");
-                cmbCarId.addItem(carId + " - " + make + " " + model);
+            String response = ServerConnection.getInstance().sendRequest("LIST|Cars");
+            if (response.startsWith("SUCCESS|")) {
+                String[] cars = response.substring(8).split(";");
+                for (String car : cars) {
+                    cmbCarId.addItem(car);
+                }
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading car IDs: " + ex.getMessage());
         }
@@ -268,46 +283,42 @@ public class InsuranceMgt extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        String selectedCar = cmbCarId.getSelectedItem().toString();
-
-        if (selectedCar.equals("Select Car") || txtPolicyNumber.getText().isEmpty() || 
-            txtInsuranceCompany.getText().isEmpty() || txtPremiumAmount.getText().isEmpty() ||
-            dateStart.getDate() == null || dateEnd.getDate() == null) {
-            JOptionPane.showMessageDialog(this, "Please fill all required fields!");
-            return;
-        }
-
-        int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
-
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "INSERT INTO insurance(car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status) VALUES (?,?,?,?,?,?,?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setString(2, txtPolicyNumber.getText());
-            pst.setString(3, txtInsuranceCompany.getText());
-            
-            if (txtCoverageAmount.getText().isEmpty()) {
-                pst.setNull(4, java.sql.Types.DECIMAL);
-            } else {
-                pst.setDouble(4, Double.parseDouble(txtCoverageAmount.getText()));
+        try {
+            String selectedCar = cmbCarId.getSelectedItem().toString();
+            if (selectedCar.equals("Select Car") || txtPolicyNumber.getText().isEmpty()
+                    || txtInsuranceCompany.getText().isEmpty() || txtPremiumAmount.getText().isEmpty()
+                    || dateStart.getDate() == null || dateEnd.getDate() == null) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
             }
-            
-            pst.setDouble(5, Double.parseDouble(txtPremiumAmount.getText()));
-            pst.setDate(6, new java.sql.Date(dateStart.getDate().getTime()));
-            pst.setDate(7, new java.sql.Date(dateEnd.getDate().getTime()));
-            pst.setString(8, cmbStatus.getSelectedItem().toString());
 
-            pst.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Insurance Added Successfully!");
-            loadInsuranceIds();
-            clearFields();
+            int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+            String startDate = new SimpleDateFormat("yyyy-MM-dd").format(dateStart.getDate());
+            String endDate = new SimpleDateFormat("yyyy-MM-dd").format(dateEnd.getDate());
 
+            String coverageAmount = txtCoverageAmount.getText().isEmpty() ? "0" : txtCoverageAmount.getText();
+
+            String insuranceData = carId + "," + txtPolicyNumber.getText() + ","
+                    + txtInsuranceCompany.getText() + "," + coverageAmount + ","
+                    + txtPremiumAmount.getText() + "," + startDate + ","
+                    + endDate + "," + cmbStatus.getSelectedItem().toString();
+
+            String response = ServerConnection.getInstance().sendRequest("ADD|Insurance|" + insuranceData);
+
+            if (response.startsWith("SUCCESS|")) {
+                JOptionPane.showMessageDialog(this, "Insurance Added Successfully!");
+                loadInsuranceIds();
+                clearFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error adding insurance: " + response);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error adding insurance: " + ex.getMessage());
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindActionPerformed
+        try {
         String selected = cmbInsuranceId.getSelectedItem().toString();
         if (selected.equals("Select Insurance")) {
             JOptionPane.showMessageDialog(this, "Please select an insurance!");
@@ -315,46 +326,33 @@ public class InsuranceMgt extends javax.swing.JFrame {
         }
 
         int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
+        String response = ServerConnection.getInstance().sendRequest("FIND|Insurance|" + insuranceId);
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "SELECT * FROM insurance WHERE insurance_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, insuranceId);
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                // Find and select car
-                int carId = rs.getInt("car_id");
-                for (int i = 0; i < cmbCarId.getItemCount(); i++) {
-                    if (cmbCarId.getItemAt(i).startsWith(carId + " - ")) {
-                        cmbCarId.setSelectedIndex(i);
-                        break;
-                    }
-                }
-
-                txtPolicyNumber.setText(rs.getString("policy_number"));
-                txtInsuranceCompany.setText(rs.getString("insurance_company"));
-                
-                double coverage = rs.getDouble("coverage_amount");
-                if (!rs.wasNull()) {
-                    txtCoverageAmount.setText(String.valueOf(coverage));
-                } else {
-                    txtCoverageAmount.setText("");
-                }
-                
-                txtPremiumAmount.setText(String.valueOf(rs.getDouble("premium_amount")));
-                dateStart.setDate(rs.getDate("start_date"));
-                dateEnd.setDate(rs.getDate("end_date"));
-                cmbStatus.setSelectedItem(rs.getString("status"));
-            } else {
-                JOptionPane.showMessageDialog(this, "Insurance not found!");
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error finding insurance: " + ex.getMessage());
+        if (response.startsWith("SUCCESS|")) {
+            String[] data = response.substring(8).split(",");
+            // Format: car_id,policy_number,insurance_company,coverage_amount,premium_amount,start_date,end_date,status
+            
+            // Set car
+            int carId = Integer.parseInt(data[0]);
+            selectItemInComboBox(cmbCarId, carId);
+            
+            txtPolicyNumber.setText(data[1]);
+            txtInsuranceCompany.setText(data[2]);
+            txtCoverageAmount.setText(data[3].equals("0") ? "" : data[3]);
+            txtPremiumAmount.setText(data[4]);
+            dateStart.setDate(java.sql.Date.valueOf(data[5]));
+            dateEnd.setDate(java.sql.Date.valueOf(data[6]));
+            cmbStatus.setSelectedItem(data[7]);
+        } else {
+            JOptionPane.showMessageDialog(this, "Insurance not found: " + response);
         }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Error finding insurance: " + ex.getMessage());
+    }
     }//GEN-LAST:event_btnFindActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+         try {
         String selected = cmbInsuranceId.getSelectedItem().toString();
         if (selected.equals("Select Insurance")) {
             JOptionPane.showMessageDialog(this, "Please select an insurance!");
@@ -362,7 +360,6 @@ public class InsuranceMgt extends javax.swing.JFrame {
         }
 
         String selectedCar = cmbCarId.getSelectedItem().toString();
-
         if (selectedCar.equals("Select Car") || txtPolicyNumber.getText().isEmpty() || 
             txtInsuranceCompany.getText().isEmpty() || txtPremiumAmount.getText().isEmpty() ||
             dateStart.getDate() == null || dateEnd.getDate() == null) {
@@ -372,37 +369,32 @@ public class InsuranceMgt extends javax.swing.JFrame {
 
         int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
         int carId = Integer.parseInt(selectedCar.split(" - ")[0]);
+        String startDate = new SimpleDateFormat("yyyy-MM-dd").format(dateStart.getDate());
+        String endDate = new SimpleDateFormat("yyyy-MM-dd").format(dateEnd.getDate());
+        
+        String coverageAmount = txtCoverageAmount.getText().isEmpty() ? "0" : txtCoverageAmount.getText();
+        
+        String insuranceData = insuranceId + "," + carId + "," + txtPolicyNumber.getText() + "," + 
+                             txtInsuranceCompany.getText() + "," + coverageAmount + "," +
+                             txtPremiumAmount.getText() + "," + startDate + "," + 
+                             endDate + "," + cmbStatus.getSelectedItem().toString();
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "UPDATE insurance SET car_id=?, policy_number=?, insurance_company=?, coverage_amount=?, premium_amount=?, start_date=?, end_date=?, status=? WHERE insurance_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, carId);
-            pst.setString(2, txtPolicyNumber.getText());
-            pst.setString(3, txtInsuranceCompany.getText());
-            
-            if (txtCoverageAmount.getText().isEmpty()) {
-                pst.setNull(4, java.sql.Types.DECIMAL);
-            } else {
-                pst.setDouble(4, Double.parseDouble(txtCoverageAmount.getText()));
-            }
-            
-            pst.setDouble(5, Double.parseDouble(txtPremiumAmount.getText()));
-            pst.setDate(6, new java.sql.Date(dateStart.getDate().getTime()));
-            pst.setDate(7, new java.sql.Date(dateEnd.getDate().getTime()));
-            pst.setString(8, cmbStatus.getSelectedItem().toString());
-            pst.setInt(9, insuranceId);
+        String response = ServerConnection.getInstance().sendRequest("UPDATE|Insurance|" + insuranceData);
 
-            pst.executeUpdate();
+        if (response.startsWith("SUCCESS|")) {
             JOptionPane.showMessageDialog(this, "Insurance Updated Successfully!");
             loadInsuranceIds();
             clearFields();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error updating insurance: " + ex.getMessage());
+        } else {
+            JOptionPane.showMessageDialog(this, "Error updating insurance: " + response);
         }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Error updating insurance: " + ex.getMessage());
+    }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        try {
         String selected = cmbInsuranceId.getSelectedItem().toString();
         if (selected.equals("Select Insurance")) {
             JOptionPane.showMessageDialog(this, "Please select an insurance!");
@@ -411,23 +403,24 @@ public class InsuranceMgt extends javax.swing.JFrame {
 
         int insuranceId = Integer.parseInt(selected.split(" - ")[0]);
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this insurance?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to delete this insurance?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm != JOptionPane.YES_OPTION) {
             return;
         }
 
-        try (Connection conn = DbConnection.getConnection()) {
-            String sql = "DELETE FROM insurance WHERE insurance_id=?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, insuranceId);
-            pst.executeUpdate();
+        String response = ServerConnection.getInstance().sendRequest("DELETE|Insurance|" + insuranceId);
+
+        if (response.startsWith("SUCCESS|")) {
             JOptionPane.showMessageDialog(this, "Insurance Deleted Successfully!");
             loadInsuranceIds();
             clearFields();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error deleting insurance: " + ex.getMessage());
+        } else {
+            JOptionPane.showMessageDialog(this, "Error deleting insurance: " + response);
         }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Error deleting insurance: " + ex.getMessage());
+    }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -439,17 +432,7 @@ public class InsuranceMgt extends javax.swing.JFrame {
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed
 
-    private void clearFields() {
-        cmbInsuranceId.setSelectedIndex(0);
-        cmbCarId.setSelectedIndex(0);
-        txtPolicyNumber.setText("");
-        txtInsuranceCompany.setText("");
-        txtCoverageAmount.setText("");
-        txtPremiumAmount.setText("");
-        dateStart.setDate(null);
-        dateEnd.setDate(null);
-        cmbStatus.setSelectedIndex(0);
-    }
+    
 
     /**
      * @param args the command line arguments
