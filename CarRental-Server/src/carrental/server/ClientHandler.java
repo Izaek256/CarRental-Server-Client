@@ -629,16 +629,29 @@ public class ClientHandler extends Thread {
         ResultSet rs = pst.executeQuery();
 
         if (rs.next()) {
-            double cost = rs.getDouble("repair_cost");
+            int rentalId = rs.getInt("rental_id");
+            int carId = rs.getInt("car_id");
             String description = rs.getString("description");
 
-            description = description.replace("|", "¦");
-            return "SUCCESS|" + rs.getInt("rental_id") + "|"
-                    + rs.getInt("car_id") + "|"
-                    + description + "|"
-                    + (rs.wasNull() ? "" : cost) + "|"
-                    + rs.getDate("reported_date") + "|"
-                    + rs.getString("status");
+            // Check for null IMMEDIATELY after reading
+            double cost = rs.getDouble("repair_cost");
+            boolean costWasNull = rs.wasNull();
+
+            java.sql.Date reportedDate = rs.getDate("reported_date");
+            String status = rs.getString("status");
+
+            // Replace pipe characters in description to avoid delimiter conflicts
+            if (description != null) {
+                description = description.replace("|", "¦");
+            }
+
+            // Build response with pipe delimiters
+            return "SUCCESS|" + rentalId + "|"
+                    + carId + "|"
+                    + (description != null ? description : "") + "|"
+                    + (costWasNull ? "" : cost) + "|"
+                    + reportedDate + "|"
+                    + status;
         }
         return "ERROR|Damage not found";
     }
@@ -892,7 +905,12 @@ public class ClientHandler extends Thread {
     }
 
     private String listRentals(Connection conn) throws SQLException {
-        String sql = "SELECT rental_id FROM rentals ORDER BY rental_id";
+        String sql = "SELECT r.rental_id, c.first_name, c.last_name, "
+                + "car.car_id, car.make, car.model "
+                + "FROM rentals r "
+                + "JOIN customers c ON r.customer_id = c.customer_id "
+                + "JOIN Cars car ON r.car_id = car.car_id "
+                + "ORDER BY r.rental_id";
         Statement st = conn.createStatement();
         ResultSet rs = st.executeQuery(sql);
 
@@ -902,7 +920,14 @@ public class ClientHandler extends Thread {
             if (!first) {
                 result.append(";");
             }
-            result.append(rs.getInt("rental_id"));
+            // Format: "rental_id - customer_name - car_info : car_id"
+            // Example: "2 - Alex Johnson - Toyota Camry : 5"
+            result.append(rs.getInt("rental_id")).append(" - ")
+                    .append(rs.getString("first_name")).append(" ")
+                    .append(rs.getString("last_name")).append(" - ")
+                    .append(rs.getString("make")).append(" ")
+                    .append(rs.getString("model")).append(" : ")
+                    .append(rs.getInt("car_id"));
             first = false;
         }
         return result.toString();

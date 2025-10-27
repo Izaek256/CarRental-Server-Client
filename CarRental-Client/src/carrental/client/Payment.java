@@ -217,7 +217,7 @@ public class Payment extends javax.swing.JFrame {
     // Helper method to select rental in combo box by ID
     private boolean selectRentalInComboBox(int rentalId) {
         for (int i = 0; i < Rental_IDComboBox.getItemCount(); i++) {
-            String item = Rental_IDComboBox.getItemAt(i).toString();
+            String item = Rental_IDComboBox.getItemAt(i);
             // Check both formats: "1 - details" and just "1"
             if (item.startsWith(rentalId + " - ") || item.equals(String.valueOf(rentalId))) {
                 Rental_IDComboBox.setSelectedIndex(i);
@@ -664,6 +664,7 @@ public class Payment extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new Payment().setVisible(true);
             }
