@@ -1,218 +1,134 @@
 package carrental.client;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
-import java.io.FileOutputStream;
-import java.sql.*;
 import javax.swing.JOptionPane;
+import java.io.*;
+import java.net.Socket;
 
+/**
+ * Client-side Report Generator
+ * Sends report requests to the server
+ * 
+ * @author Izaek Kisuule
+ */
 public class ReportGenerator {
+    
+    private static final String SERVER_HOST = "localhost";
+    private static final int SERVER_PORT = 5000;
+
+    /**
+     * Send a report request to the server and handle the response
+     */
+    private static String sendReportRequest(String reportType, String data) {
+        Socket socket = null;
+        BufferedReader reader = null;
+        PrintWriter writer = null;
+        
+        try {
+            // Connect to server
+            socket = new Socket(SERVER_HOST, SERVER_PORT);
+            
+            // Setup streams
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            
+            // Send request
+            String request = "REPORT|" + reportType + (data.isEmpty() ? "" : "|" + data);
+            writer.println(request);
+            
+            // Read response
+            String response = reader.readLine();
+            
+            return response;
+            
+        } catch (Exception e) {
+            return "ERROR|Connection failed: " + e.getMessage();
+        } finally {
+            try {
+                if (reader != null) reader.close();
+                if (writer != null) writer.close();
+                if (socket != null) socket.close();
+            } catch (IOException e) {
+                // Ignore cleanup errors
+            }
+        }
+    }
+    
+    /**
+     * Parse server response and show appropriate message
+     */
+    private static void handleResponse(String response, String reportName) {
+        if (response == null) {
+            JOptionPane.showMessageDialog(null, 
+                "No response from server", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String[] parts = response.split("\\|", 2);
+        String status = parts[0];
+        String message = parts.length > 1 ? parts[1] : "No message";
+        
+        if ("SUCCESS".equals(status)) {
+            JOptionPane.showMessageDialog(null, 
+                message, 
+                reportName + " Generated", 
+                JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, 
+                message, 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     // === 1. Customer Report ===
     public static void generateCustomerReport() {
-        try {
-            Document doc = new Document(PageSize.A4);
-            PdfWriter.getInstance(doc, new FileOutputStream("CustomerReport.pdf"));
-            doc.open();
-
-            doc.add(new Paragraph("Customer Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            doc.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(5);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{2, 3, 4, 3, 4});
-            table.addCell("ID");
-            table.addCell("Name");
-            table.addCell("Email");
-            table.addCell("Phone");
-            table.addCell("Address");
-
-            Connection conn = DbConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM Customers");
-            while (rs.next()) {
-                table.addCell(String.valueOf(rs.getInt("customer_id")));
-                table.addCell(rs.getString("first_name") + " " + rs.getString("last_name"));
-                table.addCell(rs.getString("email"));
-                table.addCell(rs.getString("phone_number"));
-                table.addCell(rs.getString("address"));
-            }
-
-            doc.add(table);
-            doc.close();
-            JOptionPane.showMessageDialog(null, "Customer Report Created!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-        }
+        String response = sendReportRequest("CUSTOMER", "");
+        handleResponse(response, "Customer Report");
     }
 
     // === 2. Car Report ===
     public static void generateCarReport() {
-        try {
-            Document doc = new Document(PageSize.A4);
-            PdfWriter.getInstance(doc, new FileOutputStream("CarReport.pdf"));
-            doc.open();
-
-            doc.add(new Paragraph("Car Inventory Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            doc.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(6);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{2, 3, 3, 2, 2, 2});
-            table.addCell("ID");
-            table.addCell("Make");
-            table.addCell("Model");
-            table.addCell("Year");
-            table.addCell("Rate");
-            table.addCell("Status");
-
-            Connection conn = DbConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM Cars");
-            while (rs.next()) {
-                table.addCell(String.valueOf(rs.getInt("car_id")));
-                table.addCell(rs.getString("make"));
-                table.addCell(rs.getString("model"));
-                table.addCell(rs.getString("year"));
-                table.addCell(rs.getString("rental_rate"));
-                table.addCell(rs.getString("status"));
-            }
-
-            doc.add(table);
-            doc.close();
-            JOptionPane.showMessageDialog(null, "Car Report Created!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-        }
+        String response = sendReportRequest("CAR", "");
+        handleResponse(response, "Car Report");
     }
 
     // === 3. Rental Report ===
     public static void generateRentalReport(String startDate, String endDate) {
-        try {
-            Document doc = new Document(PageSize.A4.rotate());
-            PdfWriter.getInstance(doc, new FileOutputStream("RentalReport.pdf"));
-            doc.open();
-
-            doc.add(new Paragraph("Rental Report (" + startDate + " to " + endDate + ")", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            doc.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(7);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{2, 4, 4, 4, 3, 3, 3});
-            table.addCell("ID");
-            table.addCell("Customer");
-            table.addCell("Car");
-            table.addCell("Employee");
-            table.addCell("Start");
-            table.addCell("End");
-            table.addCell("Total");
-
-            Connection conn = DbConnection.getConnection();
-            String sql = "SELECT r.rental_id, CONCAT(c.first_name,' ',c.last_name) AS customer, "
-                    + "CONCAT(car.make,' ',car.model,'-',car.license_plate) AS car, "
-                    + "CONCAT(e.first_name,' ',e.last_name) AS employee, "
-                    + "r.start_date, r.end_date, r.total_amount "
-                    + "FROM Rentals r "
-                    + "JOIN Customers c ON r.customer_id=c.customer_id "
-                    + "JOIN Cars car ON r.car_id=car.car_id "
-                    + "JOIN Employees_login e ON r.employee_id=e.employee_id "
-                    + "WHERE r.start_date >= ? AND r.end_date <= ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, startDate);
-            pst.setString(2, endDate);
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next()) {
-                table.addCell(String.valueOf(rs.getInt("rental_id")));
-                table.addCell(rs.getString("customer"));
-                table.addCell(rs.getString("car"));
-                table.addCell(rs.getString("employee"));
-                table.addCell(rs.getString("start_date"));
-                table.addCell(rs.getString("end_date"));
-                table.addCell(rs.getString("total_amount"));
-            }
-
-            doc.add(table);
-            doc.close();
-            JOptionPane.showMessageDialog(null, "Rental Report Created!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        // Validate dates
+        if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
+            JOptionPane.showMessageDialog(null, 
+                "Please provide both start and end dates", 
+                "Invalid Input", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
         }
+        
+        String response = sendReportRequest("RENTAL", startDate + "," + endDate);
+        handleResponse(response, "Rental Report");
     }
 
     // === 4. Payment Report ===
     public static void generatePaymentReport() {
-        try {
-            Document doc = new Document(PageSize.A4);
-            PdfWriter.getInstance(doc, new FileOutputStream("PaymentReport.pdf"));
-            doc.open();
-
-            doc.add(new Paragraph("Payment Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            doc.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(5);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{2, 3, 3, 3, 3});
-            table.addCell("Payment ID");
-            table.addCell("Rental ID");
-            table.addCell("Amount");
-            table.addCell("Date");
-            table.addCell("Method");
-
-            Connection conn = DbConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM Payments");
-            while (rs.next()) {
-                table.addCell(String.valueOf(rs.getInt("payment_id")));
-                table.addCell(String.valueOf(rs.getInt("rental_id")));
-                table.addCell(rs.getString("amount"));
-                table.addCell(rs.getString("payment_date"));
-                table.addCell(rs.getString("payment_method"));
-            }
-
-            doc.add(table);
-            doc.close();
-            JOptionPane.showMessageDialog(null, "Payment Report Created!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-        }
+        String response = sendReportRequest("PAYMENT", "");
+        handleResponse(response, "Payment Report");
     }
 
     // === 5. Maintenance Report ===
     public static void generateMaintenanceReport() {
+        String response = sendReportRequest("MAINTENANCE", "");
+        handleResponse(response, "Maintenance Report");
+    }
+    
+    // === Optional: Test method to verify connection ===
+    public static boolean testServerConnection() {
         try {
-            Document doc = new Document(PageSize.A4);
-            PdfWriter.getInstance(doc, new FileOutputStream("MaintenanceReport.pdf"));
-            doc.open();
-
-            doc.add(new Paragraph("Vehicle Maintenance Report", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            doc.add(new Paragraph("\n"));
-
-            PdfPTable table = new PdfPTable(5);
-            table.setWidthPercentage(100);
-            table.setWidths(new float[]{2, 4, 3, 4, 3});
-            table.addCell("ID");
-            table.addCell("Car");
-            table.addCell("Date");
-            table.addCell("Description");
-            table.addCell("Cost");
-
-            Connection conn = DbConnection.getConnection();
-            String sql = "SELECT m.maintenance_id, CONCAT(c.make,' ',c.model,'-',c.license_plate) AS car, "
-                    + "m.service_date, m.description, m.cost "
-                    + "FROM VehicleMaintenance m "
-                    + "JOIN Cars c ON m.car_id=c.car_id";
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            while (rs.next()) {
-                table.addCell(String.valueOf(rs.getInt("maintenance_id")));
-                table.addCell(rs.getString("car"));
-                table.addCell(rs.getString("service_date"));
-                table.addCell(rs.getString("description"));
-                table.addCell(rs.getString("cost"));
-            }
-
-            doc.add(table);
-            doc.close();
-            JOptionPane.showMessageDialog(null, "Maintenance Report Created!");
+            Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
+            socket.close();
+            return true;
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+            return false;
         }
     }
 }

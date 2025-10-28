@@ -88,10 +88,37 @@ public class ClientHandler extends Thread {
                     return handleFind(table, data);
                 case "LIST":
                     return handleList(table);
+                case "REPORT":
+                    return handleReport(table, data);
                 default:
                     return "ERROR|Unknown action: " + action;
             }
 
+        } catch (Exception e) {
+            return "ERROR|" + e.getMessage();
+        }
+    }
+     // ==================== REPORT GENERATION ====================
+    private String handleReport(String reportType, String data) {
+        try {
+            switch (reportType) {
+                case "CUSTOMER":
+                    return ServerReportGenerator.generateCustomerReport();
+                case "CAR":
+                    return ServerReportGenerator.generateCarReport();
+                case "RENTAL":
+                    String[] dates = data.split(",");
+                    if (dates.length != 2) {
+                        return "ERROR|Invalid date range format. Expected: startDate,endDate";
+                    }
+                    return ServerReportGenerator.generateRentalReport(dates[0], dates[1]);
+                case "PAYMENT":
+                    return ServerReportGenerator.generatePaymentReport();
+                case "MAINTENANCE":
+                    return ServerReportGenerator.generateMaintenanceReport();
+                default:
+                    return "ERROR|Unknown report type: " + reportType;
+            }
         } catch (Exception e) {
             return "ERROR|" + e.getMessage();
         }
@@ -945,7 +972,7 @@ public class ClientHandler extends Thread {
                 result.append(";");
             }
             result.append(rs.getInt("payment_id")).append(" - ")
-                    .append(rs.getDate("payment_date"));
+                    .append(rs.getDate("payment_date")).append(" - ").append("rental_id");
             first = false;
         }
         return result.toString();
