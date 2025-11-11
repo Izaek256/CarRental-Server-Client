@@ -545,7 +545,7 @@ public class DamagesMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void cmbRentalIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbRentalIdActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_cmbRentalIdActionPerformed
 
     private void clearFields() {

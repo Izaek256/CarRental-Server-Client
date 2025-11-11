@@ -198,15 +198,15 @@ public class Signup extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtAddressFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressFieldActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtAddressFieldActionPerformed
 
     private void txtPhoneFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPhoneFieldActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtPhoneFieldActionPerformed
 
     private void btnAlreadyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAlreadyActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
         new Login().setVisible(true);
 
@@ -214,7 +214,7 @@ public class Signup extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAlreadyActionPerformed
 
     private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed
-        // TODO add your handling code here:
+        
 
         String first = txtFirstnameField.getText();
         String last = txtLastnameField.getText();
@@ -259,11 +259,11 @@ public class Signup extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSignupActionPerformed
 
     private void txtEmailFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailFieldActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtEmailFieldActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_btnExitActionPerformed
 
     /**

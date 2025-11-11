@@ -239,7 +239,7 @@ public class Payment extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void PaymentMtdComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PaymentMtdComboBoxActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_PaymentMtdComboBoxActionPerformed
 
     private void btnPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayActionPerformed
@@ -317,7 +317,7 @@ public class Payment extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
+        
         try (Connection conn = DbConnection.getConnection()) {
             int paymentId = Integer.parseInt(txtPaymentID.getText());
 
@@ -342,13 +342,13 @@ public class Payment extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        
         dispose();
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void Rental_IDComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Rental_IDComboBoxActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_Rental_IDComboBoxActionPerformed
 
     /**

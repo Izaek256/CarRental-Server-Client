@@ -397,15 +397,15 @@ public class CarAssignment extends javax.swing.JFrame {
 
 
     private void CustomerComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CustomerComboBoxActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_CustomerComboBoxActionPerformed
 
     private void txtAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAmountActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtAmountActionPerformed
 
     private void btnRentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRentActionPerformed
-        // TODO add your handling code here:
+        
 
         try (Connection conn = DbConnection.getConnection()) {
             // Get selected IDs
@@ -451,12 +451,12 @@ public class CarAssignment extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRentActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
+        
         clearFields();
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        
         dispose();
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed

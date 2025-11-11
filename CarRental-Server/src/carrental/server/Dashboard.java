@@ -216,22 +216,22 @@ public class Dashboard extends javax.swing.JFrame {
 
 
     private void maintenanceReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maintenanceReportActionPerformed
-        // TODO add your handling code here:
+        
         ReportGenerator.generateMaintenanceReport();
     }//GEN-LAST:event_maintenanceReportActionPerformed
 
     private void customerReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerReportActionPerformed
-        // TODO add your handling code here:
+        
         ReportGenerator.generateCustomerReport();
     }//GEN-LAST:event_customerReportActionPerformed
 
     private void carReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_carReportActionPerformed
-        // TODO add your handling code here:
+        
         ReportGenerator.generateCarReport();
     }//GEN-LAST:event_carReportActionPerformed
 
     private void rentalReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rentalReportActionPerformed
-        // TODO add your handling code here:
+        
         String startDate = JOptionPane.showInputDialog(this, "Enter start date (YYYY-MM-DD):");
         String endDate = JOptionPane.showInputDialog(this, "Enter end date (YYYY-MM-DD):");
         if (startDate != null && endDate != null) {
@@ -240,7 +240,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_rentalReportActionPerformed
 
     private void paymentReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_paymentReportActionPerformed
-        // TODO add your handling code here:
+        
         ReportGenerator.generatePaymentReport();
     }//GEN-LAST:event_paymentReportActionPerformed
 
@@ -250,19 +250,19 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_menuCarsActionPerformed
 
     private void menuCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCustomersActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
         new CustomerManagement().setVisible(true);
     }//GEN-LAST:event_menuCustomersActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
         new CarAssignment().setVisible(true);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void menuPaymentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPaymentsActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
         new Payment().setVisible(true);
     }//GEN-LAST:event_menuPaymentsActionPerformed
@@ -273,7 +273,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_menuMaintenanceActionPerformed
 
     private void menuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExitActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
     }//GEN-LAST:event_menuExitActionPerformed
 

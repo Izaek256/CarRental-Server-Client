@@ -176,7 +176,7 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
+        
         try (Connection conn = DbConnection.getConnection()) {
             int carId = Integer.parseInt(CarComboBox.getSelectedItem().toString().split(" - ")[0]);
             String description = txtDescriptionField.getText();
@@ -199,7 +199,7 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        // TODO add your handling code here:
+        
 
         try (Connection conn = DbConnection.getConnection()) {
             int maintenanceId = Integer.parseInt(txtMaintenanceId.getText()); // hidden or input field
@@ -225,7 +225,7 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
+        
         try (Connection conn = DbConnection.getConnection()) {
         int maintenanceId = Integer.parseInt(txtMaintenanceId.getText()); // hidden or input field
 
@@ -241,7 +241,7 @@ public class VehicleMantenance extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        
         this.dispose();
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed

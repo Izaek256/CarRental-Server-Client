@@ -425,7 +425,7 @@ public class Payment extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void PaymentMtdComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PaymentMtdComboBoxActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_PaymentMtdComboBoxActionPerformed
 
     private void btnPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPayActionPerformed
@@ -538,24 +538,24 @@ public class Payment extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:       
+               
         new Dashboard().setVisible(true);
         dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void Rental_IDComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Rental_IDComboBoxActionPerformed
-        // TODO add your handling code here:
+        
         loadRentalAmount();
 
     }//GEN-LAST:event_Rental_IDComboBoxActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
+        
         clearForm();
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void cmbPaymentIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPaymentIDActionPerformed
-        // TODO add your handling code here:
+        
         loadPaymentData();
     }//GEN-LAST:event_cmbPaymentIDActionPerformed
 

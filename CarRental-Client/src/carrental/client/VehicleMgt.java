@@ -403,11 +403,11 @@ public class VehicleMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void txtRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRateActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtRateActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
+        
 
         clearFields();
     }//GEN-LAST:event_btnClearActionPerformed
@@ -452,14 +452,14 @@ public class VehicleMgt extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        
 
         new Dashboard().setVisible(true);
         dispose();
     }//GEN-LAST:event_btnBackActionPerformed
 
     private void txtModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtModelActionPerformed
-        // TODO add your handling code here:
+        
     }//GEN-LAST:event_txtModelActionPerformed
 
     /**

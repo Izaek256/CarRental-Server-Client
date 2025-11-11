@@ -335,12 +335,12 @@ public class CustomerManagement extends javax.swing.JFrame {
     }//GEN-LAST:event_btnFindActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
+        
         clearFields();
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        // TODO add your handling code here:
+        
         dispose();
         new Dashboard().setVisible(true);
     }//GEN-LAST:event_btnBackActionPerformed
