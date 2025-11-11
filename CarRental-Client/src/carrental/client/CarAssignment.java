@@ -9,13 +9,19 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 
 /**
+ * CarAssignment - Client Module
+ * Rental/Car Assignment Management interface.
+ * Handles creating, updating, and managing car rental assignments.
+ * Calculates rental amounts based on duration and daily rate.
+ * Communicates with server for all rental-related operations.
  *
  * @author Izaek Kisuule
  */
 public class CarAssignment extends javax.swing.JFrame {
 
     /**
-     * Creates new form CarAssignment
+     * Creates new form CarAssignment.
+     * Initializes UI, loads data (customers, cars, employees, rentals), and calculates initial amount.
      */
     public CarAssignment() {
         initComponents();
@@ -29,6 +35,9 @@ public class CarAssignment extends javax.swing.JFrame {
         loadRentalId();
     }
 
+    /**
+     * Clears all input fields and resets combo boxes and date pickers.
+     */
     private void clearFields() {
         CmbBoxRentalId.setSelectedIndex(0);
         CustomerComboBox.setSelectedIndex(0);
@@ -40,6 +49,9 @@ public class CarAssignment extends javax.swing.JFrame {
         CmbBoxRentalId.setSelectedIndex(0);
     }
 
+    /**
+     * Loads all customers from the server into the customer selection combo box.
+     */
     private void loadCustomers() {
         try {
             CustomerComboBox.removeAllItems();
@@ -66,6 +78,9 @@ public class CarAssignment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all rental records from the server into the rental selection combo box.
+     */
     private void loadRentalId() {
         try {
             CmbBoxRentalId.removeAllItems();
@@ -93,6 +108,9 @@ public class CarAssignment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all cars from the server into the car selection combo box.
+     */
     private void loadCars() {
         try {
             CarComboBox.removeAllItems();
@@ -121,6 +139,9 @@ public class CarAssignment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all employees from the server into the employee selection combo box.
+     */
     private void loadEmployees() {
         try {
             EmployeeComboBox.removeAllItems();
@@ -147,6 +168,10 @@ public class CarAssignment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Calculates the total rental amount based on selected car's daily rate and rental duration.
+     * Updates the amount text field with the calculated value.
+     */
     private void calculateAmount() {
         if (CarComboBox.getSelectedIndex() > 0 && dateStartDate.getDate() != null && dateEndDate.getDate() != null) {
             try {

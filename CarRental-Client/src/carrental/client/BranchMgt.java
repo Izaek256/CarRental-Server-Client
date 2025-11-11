@@ -6,11 +6,19 @@ package carrental.client;
 import javax.swing.*;
 
 /**
+ * BranchMgt - Client Module
+ * Branch Management interface.
+ * Manages branch offices including name, location, contact details, and assigned managers.
+ * Provides CRUD operations for branch records.
  *
  * @author Izaek Kisuule
  */
 public class BranchMgt extends javax.swing.JFrame {
 
+    /**
+     * Creates new form BranchMgt.
+     * Initializes UI components and loads branch and manager data from server.
+     */
     public BranchMgt() {
         initComponents();
         setSize(900, 700);
@@ -20,6 +28,9 @@ public class BranchMgt extends javax.swing.JFrame {
         loadManagerIds();
     }
 
+    /**
+     * Loads all branch IDs from the server into the branch selection combo box.
+     */
     private void loadBranchIds() {
         try {
             cmbBranchId.removeAllItems();
@@ -40,6 +51,9 @@ public class BranchMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all employee IDs from the server into the manager selection combo box.
+     */
     private void loadManagerIds() {
         try {
             cmbManagerId.removeAllItems();

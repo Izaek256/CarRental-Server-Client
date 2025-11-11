@@ -7,11 +7,19 @@ package carrental.client;
 import javax.swing.*;
 
 /**
+ * VehicleMgt - Client Module
+ * Vehicle/Car Management interface.
+ * Provides CRUD operations for car records including add, update, delete, find.
+ * Communicates with server for all car-related database operations.
  *
  * @author Izaek Kisuule
  */
 public class VehicleMgt extends javax.swing.JFrame {
 
+    /**
+     * Creates new form VehicleMgt.
+     * Initializes UI components, loads car IDs from server, and clears input fields.
+     */
     public VehicleMgt() {
         initComponents();
         setSize(900, 900);
@@ -21,6 +29,9 @@ public class VehicleMgt extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }
 
+    /**
+     * Loads all car IDs from the server into the car selection combo box.
+     */
     private void loadCarIds() {
         ComboBoxCarId.removeAllItems();
         ComboBoxCarId.addItem("Select Car");
@@ -46,6 +57,9 @@ public class VehicleMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Clears all input fields and resets combo boxes to default state.
+     */
     private void clearFields() {
         txtColor.setText("");
         txtMake.setText("");

@@ -9,19 +9,27 @@ import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
+ * VehicleMantenance - Client Module
+ * Vehicle Maintenance Management interface.
+ * Manages vehicle maintenance records including service dates, descriptions, and costs.
+ * Communicates with server for all maintenance-related operations.
  *
  * @author Izaek Kisuule
  */
 public class VehicleMantenance extends javax.swing.JFrame {
 
     /**
-     * Creates new form VehicleMantenance
+     * Creates new form VehicleMantenance.
+     * Initializes UI components and loads car data from server.
      */
     public VehicleMantenance() {
         initComponents();
         loadCars();
     }
 
+    /**
+     * Loads all cars from the server into the car selection combo box.
+     */
     private void loadCars() {
         try {
             CarComboBox.removeAllItems();
@@ -38,6 +46,10 @@ public class VehicleMantenance extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error loading cars: " + ex.getMessage());
         }
     }
+    
+    /**
+     * Clears all input fields and resets combo boxes and date picker.
+     */
     private void clearForm() {
         CarComboBox.setSelectedIndex(0);
         txtDescriptionField.setText("");

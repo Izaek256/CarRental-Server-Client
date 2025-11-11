@@ -7,6 +7,10 @@ package carrental.client;
 import javax.swing.JOptionPane;
 
 /**
+ * Login - Client Module
+ * Provides user authentication interface for the Car Rental System.
+ * Validates employee credentials against the server database.
+ * Allows navigation to signup form for new users.
  *
  * @author Izaek Kisuule
  */
@@ -15,7 +19,8 @@ public class Login extends javax.swing.JFrame {
 
 
     /**
-     * Creates new form Login
+     * Creates new form Login.
+     * Initializes the UI components, sets window properties, and centers the window.
      */
     
     public Login() {
@@ -122,6 +127,13 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles login button click event.
+     * Validates email and password fields, sends authentication request to server,
+     * and navigates to Dashboard on successful login.
+     * 
+     * @param evt the action event
+     */
     private void BtnloginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnloginActionPerformed
        String email = txtEmailField.getText().trim();
         String password = String.valueOf(Txtpass.getPassword()).trim();
@@ -179,6 +191,12 @@ public class Login extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_BtnloginActionPerformed
 
+    /**
+     * Handles signup button click event.
+     * Opens the Signup form and closes the current login window.
+     * 
+     * @param evt the action event
+     */
     private void BtnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnSignupActionPerformed
          
         new Signup().setVisible(true);
@@ -186,6 +204,11 @@ public class Login extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_BtnSignupActionPerformed
 
+    /**
+     * Handles email text field action event (e.g., Enter key press).
+     * 
+     * @param evt the action event
+     */
     private void txtEmailFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailFieldActionPerformed
         
     }//GEN-LAST:event_txtEmailFieldActionPerformed

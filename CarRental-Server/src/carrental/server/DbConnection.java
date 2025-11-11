@@ -9,6 +9,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
+ * DbConnection - Server Module
+ * Database connection utility class.
+ * Provides centralized JDBC connection management to the MySQL database.
+ * Connection details: localhost:3306/car_rental_sys
  *
  * @author Izaek Kisuule
  */
@@ -17,6 +21,12 @@ public class DbConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "Isaac@1234";
 
+    /**
+     * Establishes and returns a new database connection.
+     * 
+     * @return Connection object to the car_rental_sys database
+     * @throws SQLException if database connection fails
+     */
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }

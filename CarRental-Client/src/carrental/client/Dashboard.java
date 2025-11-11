@@ -7,13 +7,18 @@ package carrental.client;
 import javax.swing.*;
 
 /**
+ * Dashboard - Client Module
+ * Main navigation hub for the Car Rental System.
+ * Provides menu-based access to all management modules (Cars, Customers, Rentals, etc.)
+ * and report generation functions.
  *
  * @author Izaek Kisuule
  */
 public class Dashboard extends javax.swing.JFrame {
 
     /**
-     * Creates new form Menu
+     * Creates new form Menu (Dashboard).
+     * Initializes the UI components and sets window properties.
      */
     public Dashboard() {
         initComponents();
@@ -250,21 +255,45 @@ public class Dashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 
+    /**
+     * Handles maintenance report menu item action.
+     * Generates and displays a vehicle maintenance report.
+     * 
+     * @param evt the action event
+     */
     private void maintenanceReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maintenanceReportActionPerformed
         
         ReportGenerator.generateMaintenanceReport();
     }//GEN-LAST:event_maintenanceReportActionPerformed
 
+    /**
+     * Handles customer report menu item action.
+     * Generates and displays a customer report.
+     * 
+     * @param evt the action event
+     */
     private void customerReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerReportActionPerformed
         
         ReportGenerator.generateCustomerReport();
     }//GEN-LAST:event_customerReportActionPerformed
 
+    /**
+     * Handles car inventory report menu item action.
+     * Generates and displays a car/vehicle inventory report.
+     * 
+     * @param evt the action event
+     */
     private void carReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_carReportActionPerformed
         
         ReportGenerator.generateCarReport();
     }//GEN-LAST:event_carReportActionPerformed
 
+    /**
+     * Handles rental report menu item action.
+     * Prompts user for date range and generates rental report.
+     * 
+     * @param evt the action event
+     */
     private void rentalReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rentalReportActionPerformed
         
         String startDate = JOptionPane.showInputDialog(this, "Enter start date (YYYY-MM-DD):");
@@ -274,60 +303,126 @@ public class Dashboard extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_rentalReportActionPerformed
 
+    /**
+     * Handles payment report menu item action.
+     * Generates and displays a payment report.
+     * 
+     * @param evt the action event
+     */
     private void paymentReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_paymentReportActionPerformed
         
         ReportGenerator.generatePaymentReport();
     }//GEN-LAST:event_paymentReportActionPerformed
 
+    /**
+     * Handles manage cars menu item action.
+     * Opens the Vehicle Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuCarsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCarsActionPerformed
         this.dispose();
         new VehicleMgt().setVisible(true);
     }//GEN-LAST:event_menuCarsActionPerformed
 
+    /**
+     * Handles manage customers menu item action.
+     * Opens the Customer Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCustomersActionPerformed
         
         this.dispose();
         new CustomerManagement().setVisible(true);
     }//GEN-LAST:event_menuCustomersActionPerformed
 
+    /**
+     * Handles manage rentals menu item action.
+     * Opens the Car Assignment (Rentals) window.
+     * 
+     * @param evt the action event
+     */
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         
         this.dispose();
         new CarAssignment().setVisible(true);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
+    /**
+     * Handles manage payments menu item action.
+     * Opens the Payment Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuPaymentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPaymentsActionPerformed
         
         this.dispose();
         new Payment().setVisible(true);
     }//GEN-LAST:event_menuPaymentsActionPerformed
 
+    /**
+     * Handles vehicle maintenance menu item action.
+     * Opens the Vehicle Maintenance window.
+     * 
+     * @param evt the action event
+     */
     private void menuMaintenanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMaintenanceActionPerformed
         this.dispose();
         new VehicleMantenance().setVisible(true);
     }//GEN-LAST:event_menuMaintenanceActionPerformed
 
+    /**
+     * Handles exit menu item action.
+     * Closes the Dashboard window.
+     * 
+     * @param evt the action event
+     */
     private void menuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExitActionPerformed
         
         this.dispose();
     }//GEN-LAST:event_menuExitActionPerformed
 
+    /**
+     * Handles insurance management menu item action.
+     * Opens the Insurance Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuInsuranceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuInsuranceActionPerformed
         
         this.dispose();
         new InsuranceMgt().setVisible(true);
     }//GEN-LAST:event_menuInsuranceActionPerformed
 
+    /**
+     * Handles employee assignment menu item action.
+     * Opens the Employee Assignment Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuEmpAssignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEmpAssignActionPerformed
         this.dispose();
         new EmployeeAssignmentMgt().setVisible(true);
     }//GEN-LAST:event_menuEmpAssignActionPerformed
 
+    /**
+     * Handles branch management menu item action.
+     * Opens the Branch Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuBranchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBranchActionPerformed
         this.dispose();
         new BranchMgt().setVisible(true);
     }//GEN-LAST:event_menuBranchActionPerformed
 
+    /**
+     * Handles rental damages menu item action.
+     * Opens the Damages Management window.
+     * 
+     * @param evt the action event
+     */
     private void menuDamagesMgtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDamagesMgtActionPerformed
        this.dispose();
         new DamagesMgt().setVisible(true);

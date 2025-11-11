@@ -9,12 +9,22 @@ import java.io.*;
 import java.net.*;
 
 /**
+ * CarRentalServer - Server Module
+ * Main server bootstrap class for the Car Rental System.
+ * Listens on port 5000 for incoming client connections.
+ * Spawns a new ClientHandler thread for each connected client to handle requests concurrently.
  *
  * @author Izaek Kisuule
  */
 public class CarRentalServer {
     private static final int PORT = 5000;
     
+    /**
+     * Main entry point for the Car Rental Server.
+     * Starts the server socket and accepts client connections in an infinite loop.
+     * 
+     * @param args command line arguments (not used)
+     */
     public static void main(String[] args) {
         System.out.println("========================================");
         System.out.println("Car Rental System Server");

@@ -11,6 +11,11 @@ import java.net.*;
 import java.sql.*;
 
 /**
+ * ClientHandler - Server Module
+ * Processes client requests in a separate thread.
+ * Implements the text-based protocol: ACTION|TABLE|DATA
+ * Supported actions: ADD, UPDATE, DELETE, FIND, LIST, REPORT
+ * Handles database operations for all system tables.
  *
  * @author Izaek Kisuule
  */
@@ -21,11 +26,21 @@ public class ClientHandler extends Thread {
     private PrintWriter writer;
     private final int clientId;
 
+    /**
+     * Constructs a new ClientHandler for the given socket connection.
+     * 
+     * @param socket the client socket connection
+     * @param clientId unique identifier for this client
+     */
     public ClientHandler(Socket socket, int clientId) {
         this.socket = socket;
         this.clientId = clientId;
     }
 
+    /**
+     * Main thread execution method.
+     * Sets up I/O streams, reads client requests, processes them, and sends responses.
+     */
     @Override
     public void run() {
         try {
@@ -63,7 +78,11 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Process client request Format: ACTION|TABLE|DATA
+     * Processes a client request and returns the appropriate response.
+     * Request format: ACTION|TABLE|DATA
+     * 
+     * @param request the client request string
+     * @return response string in format STATUS|MESSAGE or STATUS|DATA
      */
     private String processRequest(String request) {
         try {
@@ -98,7 +117,15 @@ public class ClientHandler extends Thread {
             return "ERROR|" + e.getMessage();
         }
     }
-     // ==================== REPORT GENERATION ====================
+    
+    /**
+     * Handles REPORT action requests.
+     * Delegates to ServerReportGenerator for PDF generation.
+     * 
+     * @param reportType the type of report (CUSTOMER, CAR, RENTAL, PAYMENT, MAINTENANCE)
+     * @param data additional data for the report (e.g., date range)
+     * @return success or error message with file path
+     */
     private String handleReport(String reportType, String data) {
         try {
             switch (reportType) {
@@ -125,6 +152,13 @@ public class ClientHandler extends Thread {
     }
 
     // ==================== ADD OPERATIONS ====================
+    /**
+     * Handles ADD action requests for all tables.
+     * 
+     * @param table the target table name
+     * @param data comma-separated field values
+     * @return success or error message
+     */
     private String handleAdd(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             String[] fields;
@@ -163,6 +197,14 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Adds a new car record to the database.
+     * 
+     * @param conn database connection
+     * @param fields car data fields: make, model, year, license_plate, rental_rate, status, color, mileage
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addCar(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO Cars(make, model, year, license_plate, rental_rate, status, color, mileage) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);

@@ -7,11 +7,19 @@ import javax.swing.*;
 import java.text.SimpleDateFormat;
 
 /**
+ * EmployeeAssignmentMgt - Client Module
+ * Employee Assignment Management interface.
+ * Manages employee assignments to branches and tasks.
+ * Tracks assignment types, dates, descriptions, and status.
  *
  * @author Izaek Kisuule
  */
 public class EmployeeAssignmentMgt extends javax.swing.JFrame {
 
+    /**
+     * Creates new form EmployeeAssignmentMgt.
+     * Initializes UI components and loads assignment, employee, and branch data from server.
+     */
     public EmployeeAssignmentMgt() {
         initComponents();
         setSize(900, 700);
@@ -22,6 +30,9 @@ public class EmployeeAssignmentMgt extends javax.swing.JFrame {
         loadBranchIds();
     }
 
+    /**
+     * Loads all assignment IDs from the server into the assignment selection combo box.
+     */
     private void loadAssignmentIds() {
         cmbAssignmentId.removeAllItems();
         cmbAssignmentId.addItem("Select Assignment");
@@ -39,6 +50,9 @@ public class EmployeeAssignmentMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all employee IDs from the server into the employee selection combo box.
+     */
     private void loadEmployeeIds() {
         cmbEmployeeId.removeAllItems();
         cmbEmployeeId.addItem("Select Employee");
@@ -56,6 +70,9 @@ public class EmployeeAssignmentMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all branch IDs from the server into the branch selection combo box.
+     */
     private void loadBranchIds() {
         cmbBranchId.removeAllItems();
         cmbBranchId.addItem("Select Branch");

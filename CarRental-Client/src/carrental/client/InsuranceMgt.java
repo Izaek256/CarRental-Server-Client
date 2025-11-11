@@ -8,13 +8,18 @@ import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
+ * InsuranceMgt - Client Module
+ * Insurance Management interface.
+ * Manages vehicle insurance records including policy details, coverage amounts, and dates.
+ * Provides CRUD operations for insurance policies.
  *
  * @author Izaek Kisuule
  */
 public class InsuranceMgt extends javax.swing.JFrame {
 
     /**
-     * Creates new form InsuranceMgt
+     * Creates new form InsuranceMgt.
+     * Initializes UI components and loads insurance and car data from server.
      */
     public InsuranceMgt() {
         initComponents();
@@ -25,6 +30,12 @@ public class InsuranceMgt extends javax.swing.JFrame {
         loadCarIds();
     }
 
+    /**
+     * Selects an item in a combo box by matching the ID prefix.
+     * 
+     * @param comboBox the combo box to search
+     * @param id the ID to match
+     */
     private void selectItemInComboBox(JComboBox<String> comboBox, int id) {
         for (int i = 0; i < comboBox.getItemCount(); i++) {
             String item = comboBox.getItemAt(i);
@@ -34,6 +45,10 @@ public class InsuranceMgt extends javax.swing.JFrame {
             }
         }
     }
+    
+    /**
+     * Clears all input fields and resets combo boxes and date pickers.
+     */
     private void clearFields() {
         cmbInsuranceId.setSelectedIndex(0);
         cmbCarId.setSelectedIndex(0);
@@ -46,6 +61,9 @@ public class InsuranceMgt extends javax.swing.JFrame {
         cmbStatus.setSelectedIndex(0);
     }
 
+    /**
+     * Loads all insurance IDs from the server into the insurance selection combo box.
+     */
     private void loadInsuranceIds() {
         try {
             cmbInsuranceId.removeAllItems();
@@ -63,6 +81,9 @@ public class InsuranceMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all car IDs from the server into the car selection combo box.
+     */
     private void loadCarIds() {
         try {
             cmbCarId.removeAllItems();

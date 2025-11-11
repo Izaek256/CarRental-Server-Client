@@ -5,6 +5,10 @@ package carrental.client;
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 /**
+ * CustomerManagement - Client Module
+ * Customer Management interface.
+ * Provides CRUD operations for customer records.
+ * Communicates with server for all customer-related database operations.
  *
  * @author Izaek Kisuule
  */
@@ -14,7 +18,8 @@ import javax.swing.*;
 public class CustomerManagement extends javax.swing.JFrame {
 
     /**
-     * Creates new form CustomerManagement
+     * Creates new form CustomerManagement.
+     * Initializes UI components, loads customers from server, and clears input fields.
      */
     public CustomerManagement() {
         initComponents();
@@ -25,6 +30,9 @@ public class CustomerManagement extends javax.swing.JFrame {
         clearFields();
     }
     
+    /**
+     * Clears all input fields.
+     */
     private void clearFields() {
         txtFirstnameField.setText("");
         txtLastnameField.setText("");
@@ -33,6 +41,10 @@ public class CustomerManagement extends javax.swing.JFrame {
         txtAddressField.setText("");
         txtLicenseNumber.setText("");
     }
+    
+    /**
+     * Loads all customers from the server into the customer selection combo box.
+     */
     private void loadCustomers() {
         try {
             CustomerCmbBox.removeAllItems();

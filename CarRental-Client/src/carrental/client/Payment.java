@@ -8,13 +8,17 @@ import javax.swing.JOptionPane;
 import java.text.SimpleDateFormat;
 
 /**
+ * Payment - Client Module
+ * Payment Management interface.
+ * Handles payment processing for car rentals including add, update, delete operations.
+ * Auto-loads rental amounts and provides payment tracking functionality.
  *
  * @author Izaek Kisuule
  */
 public class Payment extends javax.swing.JFrame {
 
     /**
-     * Creates new form Payment
+     * Loads all rental IDs from the server into the rental selection combo box.
      */
     private void loadRentalIDs() {
         try {
@@ -33,6 +37,9 @@ public class Payment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all payment IDs from the server into the payment selection combo box.
+     */
     private void loadPaymentIDs() {
         try {
             cmbPaymentID.removeAllItems();
@@ -50,6 +57,9 @@ public class Payment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Clears all input fields and resets combo boxes.
+     */
     private void clearForm() {
         // Use safe selection methods
         if (cmbPaymentID.getItemCount() > 0) {
@@ -65,6 +75,10 @@ public class Payment extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Creates new form Payment.
+     * Initializes UI, loads data, and sets up action listeners.
+     */
     public Payment() {
         initComponents();
         setTitle("Payment - Car Rental System");
@@ -77,6 +91,9 @@ public class Payment extends javax.swing.JFrame {
         clearForm();
     }
 
+    /**
+     * Sets up action listeners for combo boxes to auto-load related data.
+     */
     private void setupActionListeners() {
         // Auto-load rental amount when rental is selected - with null safety
         Rental_IDComboBox.addActionListener(evt -> {
@@ -95,6 +112,9 @@ public class Payment extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Auto-loads the total rental amount when a rental is selected.
+     */
     private void loadRentalAmount() {
         try {
             // Safe null check

@@ -16,7 +16,11 @@ public class ReportGenerator {
     private static final int SERVER_PORT = 5000;
 
     /**
-     * Send a report request to the server and handle the response
+     * Sends a report request to the server and retrieves the response.
+     * 
+     * @param reportType the type of report to generate (CUSTOMER, CAR, RENTAL, PAYMENT, MAINTENANCE)
+     * @param data additional data for the report (e.g., date range for rentals)
+     * @return server response in format STATUS|MESSAGE
      */
     private static String sendReportRequest(String reportType, String data) {
         Socket socket = null;
@@ -54,7 +58,10 @@ public class ReportGenerator {
     }
     
     /**
-     * Parse server response and show appropriate message
+     * Parses server response and displays appropriate message dialog.
+     * 
+     * @param response the server response in format STATUS|MESSAGE
+     * @param reportName the name of the report for display in dialog title
      */
     private static void handleResponse(String response, String reportName) {
         if (response == null) {
@@ -83,18 +90,32 @@ public class ReportGenerator {
     }
 
     // === 1. Customer Report ===
+    /**
+     * Generates a customer report by sending request to the server.
+     * Displays the result in a message dialog.
+     */
     public static void generateCustomerReport() {
         String response = sendReportRequest("CUSTOMER", "");
         handleResponse(response, "Customer Report");
     }
 
     // === 2. Car Report ===
+    /**
+     * Generates a car/vehicle report by sending request to the server.
+     * Displays the result in a message dialog.
+     */
     public static void generateCarReport() {
         String response = sendReportRequest("CAR", "");
         handleResponse(response, "Car Report");
     }
 
     // === 3. Rental Report ===
+    /**
+     * Generates a rental report for a specific date range.
+     * 
+     * @param startDate the start date for the report (format: YYYY-MM-DD)
+     * @param endDate the end date for the report (format: YYYY-MM-DD)
+     */
     public static void generateRentalReport(String startDate, String endDate) {
         // Validate dates
         if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
@@ -110,18 +131,31 @@ public class ReportGenerator {
     }
 
     // === 4. Payment Report ===
+    /**
+     * Generates a payment report by sending request to the server.
+     * Displays the result in a message dialog.
+     */
     public static void generatePaymentReport() {
         String response = sendReportRequest("PAYMENT", "");
         handleResponse(response, "Payment Report");
     }
 
     // === 5. Maintenance Report ===
+    /**
+     * Generates a vehicle maintenance report by sending request to the server.
+     * Displays the result in a message dialog.
+     */
     public static void generateMaintenanceReport() {
         String response = sendReportRequest("MAINTENANCE", "");
         handleResponse(response, "Maintenance Report");
     }
     
     // === Optional: Test method to verify connection ===
+    /**
+     * Tests the connection to the server.
+     * 
+     * @return true if connection successful, false otherwise
+     */
     public static boolean testServerConnection() {
         try {
             Socket socket = new Socket(SERVER_HOST, SERVER_PORT);

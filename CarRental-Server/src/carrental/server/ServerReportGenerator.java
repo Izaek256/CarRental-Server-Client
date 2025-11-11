@@ -7,14 +7,21 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 
 /**
- * Server-side Report Generator
- * Generates PDF reports on the server and returns status to client
+ * ServerReportGenerator - Server Module
+ * Server-side PDF report generation using iText library.
+ * Generates PDF reports for customers, cars, rentals, payments, and maintenance.
+ * Reports are saved to the server file system with timestamped filenames.
  * 
  * @author Izaek Kisuule
  */
 public class ServerReportGenerator {
 
     // === 1. Customer Report ===
+    /**
+     * Generates a PDF report of all customers.
+     * 
+     * @return success message with filename or error message
+     */
     public static String generateCustomerReport() {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
@@ -85,6 +92,11 @@ public class ServerReportGenerator {
     }
 
     // === 2. Car Report ===
+    /**
+     * Generates a PDF inventory report of all cars with availability statistics.
+     * 
+     * @return success message with filename or error message
+     */
     public static String generateCarReport() {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
@@ -163,6 +175,13 @@ public class ServerReportGenerator {
     }
 
     // === 3. Rental Report ===
+    /**
+     * Generates a PDF report of rentals within a specific date range.
+     * 
+     * @param startDate the start date in YYYY-MM-DD format
+     * @param endDate the end date in YYYY-MM-DD format
+     * @return success message with filename or error message
+     */
     public static String generateRentalReport(String startDate, String endDate) {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
@@ -259,6 +278,11 @@ public class ServerReportGenerator {
     }
 
     // === 4. Payment Report ===
+    /**
+     * Generates a PDF report of all payments with total statistics.
+     * 
+     * @return success message with filename or error message
+     */
     public static String generatePaymentReport() {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
@@ -334,6 +358,11 @@ public class ServerReportGenerator {
     }
 
     // === 5. Maintenance Report ===
+    /**
+     * Generates a PDF report of all vehicle maintenance records with cost summary.
+     * 
+     * @return success message with filename or error message
+     */
     public static String generateMaintenanceReport() {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());

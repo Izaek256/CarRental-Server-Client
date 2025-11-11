@@ -8,6 +8,10 @@ import java.text.SimpleDateFormat;
 import javax.swing.*;
 
 /**
+ * DamagesMgt - Client Module
+ * Damages Management interface.
+ * Manages rental damage reports including descriptions, repair costs, and status tracking.
+ * Auto-fills car information based on selected rental.
  *
  * @author Izaek Kisuule
  */
@@ -16,7 +20,8 @@ public class DamagesMgt extends javax.swing.JFrame {
     private boolean isLoadingData = false;
 
     /**
-     * Creates new form DamagesMgt
+     * Creates new form DamagesMgt.
+     * Initializes UI components, loads data from server, and sets up auto-fill listeners.
      */
     public DamagesMgt() {
         initComponents();
@@ -35,6 +40,10 @@ public class DamagesMgt extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Auto-fills the car selection combo box based on the selected rental.
+     * Extracts car ID from rental information and selects corresponding car.
+     */
     private void autoFillCarFromRental() {
         try {
             Object selectedItem = cmbRentalId.getSelectedItem();
@@ -71,6 +80,9 @@ public class DamagesMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all damage IDs from the server into the damage selection combo box.
+     */
     private void loadDamageIds() {
         try {
             cmbDamageId.removeAllItems();
@@ -90,6 +102,9 @@ public class DamagesMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all rental IDs from the server into the rental selection combo box.
+     */
     private void loadRentalIds() {
         try {
             cmbRentalId.removeAllItems();
@@ -109,6 +124,9 @@ public class DamagesMgt extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Loads all car IDs from the server into the car selection combo box.
+     */
     private void loadCarIds() {
         try {
             cmbCarId.removeAllItems();

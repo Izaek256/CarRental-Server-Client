@@ -7,13 +7,18 @@ package carrental.client;
 import javax.swing.JOptionPane;
 
 /**
+ * Signup - Client Module
+ * Provides employee registration interface for the Car Rental System.
+ * Collects employee information and sends registration request to the server.
+ * Validates input fields and password confirmation.
  *
  * @author Izaek Kisuule
  */
 public class Signup extends javax.swing.JFrame {
 
     /**
-     * Creates new form Signup
+     * Creates new form Signup.
+     * Initializes the UI components and sets window properties.
      */
     public Signup() {
         initComponents();
@@ -194,14 +199,30 @@ public class Signup extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Handles address text field action event.
+     * 
+     * @param evt the action event
+     */
     private void txtAddressFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressFieldActionPerformed
         
     }//GEN-LAST:event_txtAddressFieldActionPerformed
 
+    /**
+     * Handles phone text field action event.
+     * 
+     * @param evt the action event
+     */
     private void txtPhoneFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPhoneFieldActionPerformed
         
     }//GEN-LAST:event_txtPhoneFieldActionPerformed
 
+    /**
+     * Handles "I have an account" button click.
+     * Closes signup form and opens the login window.
+     * 
+     * @param evt the action event
+     */
     private void btnAlreadyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAlreadyActionPerformed
         
         this.dispose();
@@ -210,6 +231,13 @@ public class Signup extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnAlreadyActionPerformed
 
+    /**
+     * Handles signup button click event.
+     * Validates all input fields, checks password confirmation match,
+     * and sends employee registration request to the server.
+     * 
+     * @param evt the action event
+     */
     private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed
         
 String first = txtFirstnameField.getText();
@@ -258,10 +286,20 @@ String first = txtFirstnameField.getText();
         }
     }//GEN-LAST:event_btnSignupActionPerformed
 
+    /**
+     * Handles email text field action event.
+     * 
+     * @param evt the action event
+     */
     private void txtEmailFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtEmailFieldActionPerformed
         
     }//GEN-LAST:event_txtEmailFieldActionPerformed
 
+    /**
+     * Handles exit button click event.
+     * 
+     * @param evt the action event
+     */
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         
     }//GEN-LAST:event_btnExitActionPerformed
