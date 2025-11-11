@@ -220,6 +220,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Car added successfully";
     }
 
+    /**
+     * Adds a new branch record to the database.
+     * 
+     * @param conn database connection
+     * @param fields branch data fields: branch_name, address, city, phone_number, email, manager_id, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addBranch(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO branches(branch_name, address, city, phone_number, email, manager_id, status) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -238,6 +246,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Branch added successfully";
     }
 
+    /**
+     * Adds a new insurance record to the database.
+     * 
+     * @param conn database connection
+     * @param fields insurance data fields: car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addInsurance(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO insurance(car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status) VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -257,6 +273,15 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Insurance added successfully";
     }
 
+    /**
+     * Adds a new damage record to the database.
+     * Handles pipe character replacement in description to avoid delimiter conflicts.
+     * 
+     * @param conn database connection
+     * @param fields damage data fields: rental_id, car_id, description, repair_cost, reported_date, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addDamage(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO damages(rental_id, car_id, description, repair_cost, reported_date, status) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -274,6 +299,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Damage record added successfully";
     }
 
+    /**
+     * Adds a new employee assignment record to the database.
+     * 
+     * @param conn database connection
+     * @param fields assignment data fields: employee_id, branch_id, assignment_type, assignment_date, description, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addAssignment(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO employeeassignments(employee_id, branch_id, assignment_type, assignment_date, description, status) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -287,6 +320,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Assignment added successfully";
     }
 
+    /**
+     * Adds a new vehicle maintenance record to the database.
+     * 
+     * @param conn database connection
+     * @param fields maintenance data fields: car_id, service_date, description, cost
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addMaintenance(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO vehiclemaintenance(car_id, service_date, description, cost) VALUES (?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -298,6 +339,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Maintenance record added successfully";
     }
 
+    /**
+     * Adds a new rental record to the database.
+     * 
+     * @param conn database connection
+     * @param fields rental data fields: customer_id, car_id, employee_id, start_date, end_date, total_amount, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addRental(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO rentals(customer_id, car_id, employee_id, start_date, end_date, total_amount, status) VALUES (?,?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -312,6 +361,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Rental added successfully";
     }
 
+    /**
+     * Adds a new payment record to the database.
+     * 
+     * @param conn database connection
+     * @param fields payment data fields: rental_id, amount, payment_date, payment_method, payment_status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addPayment(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO payments(rental_id, amount, payment_date, payment_method, payment_status) VALUES (?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -324,6 +381,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Payment added successfully";
     }
 
+    /**
+     * Adds a new customer record to the database.
+     * 
+     * @param conn database connection
+     * @param fields customer data fields: first_name, last_name, email, phone_number, address, license_number
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addCustomer(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO customers(first_name, last_name, email, phone_number, address, license_number) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -337,6 +402,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Customer added successfully";
     }
 
+    /**
+     * Adds a new employee record to the database.
+     * 
+     * @param conn database connection
+     * @param fields employee data fields: first_name, last_name, email, phone_number, address, password_hash
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String addEmployee(Connection conn, String[] fields) throws SQLException {
         String sql = "INSERT INTO employees_login(first_name, last_name, email, phone_number, address, password_hash) VALUES (?,?,?,?,?,?)";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -351,6 +424,13 @@ public class ClientHandler extends Thread {
     }
 
     // ==================== UPDATE OPERATIONS ====================
+    /**
+     * Handles UPDATE action requests for all tables.
+     * 
+     * @param table the target table name
+     * @param data comma-separated field values with ID as first field
+     * @return success or error message
+     */
     private String handleUpdate(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             String[] fields;
@@ -390,6 +470,14 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Updates an existing car record in the database.
+     * 
+     * @param conn database connection
+     * @param fields car data fields: car_id, make, model, year, license_plate, rental_rate, status, color, mileage
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateCar(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE Cars SET make=?, model=?, year=?, license_plate=?, rental_rate=?, status=?, color=?, mileage=? WHERE car_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -406,6 +494,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Car updated successfully";
     }
 
+    /**
+     * Updates an existing branch record in the database.
+     * 
+     * @param conn database connection
+     * @param fields branch data fields: branch_id, branch_name, address, city, phone_number, email, manager_id, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateBranch(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE branches SET branch_name=?, address=?, city=?, phone_number=?, email=?, manager_id=?, status=? WHERE branch_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -425,6 +521,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Branch updated successfully";
     }
 
+    /**
+     * Updates an existing insurance record in the database.
+     * 
+     * @param conn database connection
+     * @param fields insurance data fields: insurance_id, car_id, policy_number, insurance_company, coverage_amount, premium_amount, start_date, end_date, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateInsurance(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE insurance SET car_id=?, policy_number=?, insurance_company=?, coverage_amount=?, premium_amount=?, start_date=?, end_date=?, status=? WHERE insurance_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -445,6 +549,15 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Insurance updated successfully";
     }
 
+    /**
+     * Updates an existing damage record in the database.
+     * Handles pipe character replacement in description to avoid delimiter conflicts.
+     * 
+     * @param conn database connection
+     * @param fields damage data fields: damage_id, rental_id, car_id, description, repair_cost, reported_date, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateDamage(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE damages SET rental_id=?, car_id=?, description=?, repair_cost=?, reported_date=?, status=? WHERE damage_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -463,6 +576,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Damage updated successfully";
     }
 
+    /**
+     * Updates an existing employee assignment record in the database.
+     * 
+     * @param conn database connection
+     * @param fields assignment data fields: assignment_id, employee_id, branch_id, assignment_type, assignment_date, description, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateAssignment(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE employeeassignments SET employee_id=?, branch_id=?, assignment_type=?, assignment_date=?, description=?, status=? WHERE assignment_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -477,6 +598,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Assignment updated successfully";
     }
 
+    /**
+     * Updates an existing vehicle maintenance record in the database.
+     * 
+     * @param conn database connection
+     * @param fields maintenance data fields: maintenance_id, car_id, service_date, description, cost
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateMaintenance(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE vehiclemaintenance SET car_id=?, service_date=?, description=?, cost=? WHERE maintenance_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -489,6 +618,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Maintenance updated successfully";
     }
 
+    /**
+     * Updates an existing rental record in the database.
+     * 
+     * @param conn database connection
+     * @param fields rental data fields: rental_id, customer_id, car_id, employee_id, start_date, end_date, total_amount, status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateRental(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE rentals SET customer_id=?, car_id=?, employee_id=?, start_date=?, end_date=?, total_amount=?, status=? WHERE rental_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -504,6 +641,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Rental updated successfully";
     }
 
+    /**
+     * Updates an existing payment record in the database.
+     * 
+     * @param conn database connection
+     * @param fields payment data fields: payment_id, rental_id, amount, payment_date, payment_method, payment_status
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updatePayment(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE payments SET rental_id=?, amount=?, payment_date=?, payment_method=?, payment_status=? WHERE payment_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -517,6 +662,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Payment updated successfully";
     }
 
+    /**
+     * Updates an existing customer record in the database.
+     * 
+     * @param conn database connection
+     * @param fields customer data fields: customer_id, first_name, last_name, email, phone_number, address, license_number
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateCustomer(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE customers SET first_name=?, last_name=?, email=?, phone_number=?, address=?, license_number=? WHERE customer_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -531,6 +684,14 @@ public class ClientHandler extends Thread {
         return "SUCCESS|Customer updated successfully";
     }
 
+    /**
+     * Updates an existing employee record in the database.
+     * 
+     * @param conn database connection
+     * @param fields employee data fields: employee_id, first_name, last_name, email, phone_number, address, password_hash
+     * @return success message
+     * @throws SQLException if database error occurs
+     */
     private String updateEmployee(Connection conn, String[] fields) throws SQLException {
         String sql = "UPDATE employees_login SET first_name=?, last_name=?, email=?, phone_number=?, address=?, password_hash=? WHERE employee_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -546,6 +707,13 @@ public class ClientHandler extends Thread {
     }
 
     // ==================== DELETE OPERATIONS ====================
+    /**
+     * Handles DELETE action requests for all tables.
+     * 
+     * @param table the target table name
+     * @param data the ID of the record to delete
+     * @return success or error message
+     */
     private String handleDelete(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             int id = Integer.parseInt(data);
@@ -597,6 +765,13 @@ public class ClientHandler extends Thread {
     }
 
     // ==================== FIND OPERATIONS ====================
+    /**
+     * Handles FIND action requests for all tables.
+     * 
+     * @param table the target table name
+     * @param data the ID of the record to find
+     * @return success with record data or error message
+     */
     private String handleFind(String table, String data) {
         try (Connection conn = DbConnection.getConnection()) {
             int id = Integer.parseInt(data);
@@ -631,6 +806,14 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Finds a car record by ID.
+     * 
+     * @param conn database connection
+     * @param id the car ID to search for
+     * @return success with car data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findCar(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM Cars WHERE car_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -650,6 +833,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Car not found";
     }
 
+    /**
+     * Finds a branch record by ID.
+     * 
+     * @param conn database connection
+     * @param id the branch ID to search for
+     * @return success with branch data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findBranch(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM branches WHERE branch_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -671,6 +862,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Branch not found";
     }
 
+    /**
+     * Finds an insurance record by ID.
+     * 
+     * @param conn database connection
+     * @param id the insurance ID to search for
+     * @return success with insurance data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findInsurance(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM insurance WHERE insurance_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -691,6 +890,15 @@ public class ClientHandler extends Thread {
         return "ERROR|Insurance not found";
     }
 
+    /**
+     * Finds a damage record by ID.
+     * Handles pipe character replacement in description to avoid delimiter conflicts.
+     * 
+     * @param conn database connection
+     * @param id the damage ID to search for
+     * @return success with damage data using pipe delimiters or error message
+     * @throws SQLException if database error occurs
+     */
     private String findDamage(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM damages WHERE damage_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -725,6 +933,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Damage not found";
     }
 
+    /**
+     * Finds an employee assignment record by ID.
+     * 
+     * @param conn database connection
+     * @param id the assignment ID to search for
+     * @return success with assignment data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findAssignment(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM employeeassignments WHERE assignment_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -742,6 +958,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Assignment not found";
     }
 
+    /**
+     * Finds a vehicle maintenance record by ID.
+     * 
+     * @param conn database connection
+     * @param id the maintenance ID to search for
+     * @return success with maintenance data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findMaintenance(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM vehiclemaintenance WHERE maintenance_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -757,6 +981,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Maintenance record not found";
     }
 
+    /**
+     * Finds a rental record by ID.
+     * 
+     * @param conn database connection
+     * @param id the rental ID to search for
+     * @return success with rental data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findRental(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM rentals WHERE rental_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -775,6 +1007,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Rental not found";
     }
 
+    /**
+     * Finds a payment record by ID.
+     * 
+     * @param conn database connection
+     * @param id the payment ID to search for
+     * @return success with payment data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findPayment(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM payments WHERE payment_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -791,6 +1031,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Payment not found";
     }
 
+    /**
+     * Finds a customer record by ID.
+     * 
+     * @param conn database connection
+     * @param id the customer ID to search for
+     * @return success with customer data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findCustomer(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM customers WHERE customer_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -811,6 +1059,14 @@ public class ClientHandler extends Thread {
         return "ERROR|Customer not found";
     }
 
+    /**
+     * Finds an employee record by ID.
+     * 
+     * @param conn database connection
+     * @param id the employee ID to search for
+     * @return success with employee data or error message
+     * @throws SQLException if database error occurs
+     */
     private String findEmployee(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM employees_login WHERE employee_id=?";
         PreparedStatement pst = conn.prepareStatement(sql);
@@ -831,6 +1087,13 @@ public class ClientHandler extends Thread {
     }
 
     // ==================== LIST OPERATIONS ====================
+    /**
+     * Handles LIST action requests for all tables.
+     * Returns a summary list of all records in the specified table.
+     * 
+     * @param table the target table name
+     * @return success with semicolon-separated list of records or error message
+     */
     private String handleList(String table) {
         try (Connection conn = DbConnection.getConnection()) {
 
@@ -864,6 +1127,14 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Lists all cars with basic information.
+     * Format: "car_id - make model"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of cars
+     * @throws SQLException if database error occurs
+     */
     private String listCars(Connection conn) throws SQLException {
         String sql = "SELECT car_id, make, model FROM Cars ORDER BY car_id";
         Statement st = conn.createStatement();
@@ -883,6 +1154,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all branches with basic information.
+     * Format: "branch_id - branch_name"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of branches
+     * @throws SQLException if database error occurs
+     */
     private String listBranches(Connection conn) throws SQLException {
         String sql = "SELECT branch_id, branch_name FROM branches ORDER BY branch_id";
         Statement st = conn.createStatement();
@@ -901,6 +1180,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all insurance policies with basic information.
+     * Format: "insurance_id - policy_number"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of insurance policies
+     * @throws SQLException if database error occurs
+     */
     private String listInsurance(Connection conn) throws SQLException {
         String sql = "SELECT insurance_id, policy_number FROM insurance ORDER BY insurance_id";
         Statement st = conn.createStatement();
@@ -919,6 +1206,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all damage records with basic information.
+     * Format: "damage_id - status"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of damages
+     * @throws SQLException if database error occurs
+     */
     private String listDamages(Connection conn) throws SQLException {
         String sql = "SELECT damage_id, status FROM damages ORDER BY damage_id";
         Statement st = conn.createStatement();
@@ -937,6 +1232,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all employee assignments with basic information.
+     * Format: "assignment_id - assignment_type"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of assignments
+     * @throws SQLException if database error occurs
+     */
     private String listAssignments(Connection conn) throws SQLException {
         String sql = "SELECT assignment_id, assignment_type FROM employeeassignments ORDER BY assignment_id";
         Statement st = conn.createStatement();
@@ -955,6 +1258,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all vehicle maintenance records with basic information.
+     * Format: "maintenance_id - service_date"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of maintenance records
+     * @throws SQLException if database error occurs
+     */
     private String listMaintenance(Connection conn) throws SQLException {
         String sql = "SELECT maintenance_id, service_date FROM vehiclemaintenance ORDER BY maintenance_id";
         Statement st = conn.createStatement();
@@ -973,6 +1284,15 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all rentals with detailed information including customer and car details.
+     * Format: "rental_id - customer_name - car_info : car_id"
+     * Example: "2 - Alex Johnson - Toyota Camry : 5"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of rentals
+     * @throws SQLException if database error occurs
+     */
     private String listRentals(Connection conn) throws SQLException {
         String sql = "SELECT r.rental_id, c.first_name, c.last_name, "
                 + "car.car_id, car.make, car.model "
@@ -1002,6 +1322,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all payments with basic information.
+     * Format: "payment_id - payment_date - rental_id"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of payments
+     * @throws SQLException if database error occurs
+     */
     private String listPayments(Connection conn) throws SQLException {
         String sql = "SELECT payment_id, payment_date FROM payments ORDER BY payment_id";
         Statement st = conn.createStatement();
@@ -1020,6 +1348,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all customers with basic information.
+     * Format: "customer_id - first_name last_name"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of customers
+     * @throws SQLException if database error occurs
+     */
     private String listCustomers(Connection conn) throws SQLException {
         String sql = "SELECT customer_id, first_name, last_name FROM customers ORDER BY customer_id";
         Statement st = conn.createStatement();
@@ -1039,6 +1375,14 @@ public class ClientHandler extends Thread {
         return result.toString();
     }
 
+    /**
+     * Lists all employees with basic information.
+     * Format: "employee_id - first_name last_name"
+     * 
+     * @param conn database connection
+     * @return success with semicolon-separated list of employees
+     * @throws SQLException if database error occurs
+     */
     private String listEmployees(Connection conn) throws SQLException {
         String sql = "SELECT employee_id, first_name, last_name FROM employees_login ORDER BY employee_id";
         Statement st = conn.createStatement();
