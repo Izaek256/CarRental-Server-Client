@@ -23,11 +23,6 @@ public class Login extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setTitle("Login Page");
         setSize(500, 500);
-//        con = null;
-//        st = null;
-//        cs = "jdbc:mysql://localhost:3306/car_rental_sys";
-//        user = "root";
-//        password = "isaacK@12345";
     }
 
     /**
@@ -101,8 +96,8 @@ public class Login extends javax.swing.JFrame {
                                     .addComponent(txtEmailField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(40, 40, 40)
-                        .addComponent(jLabel1)))
-                .addContainerGap(41, Short.MAX_VALUE))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 625, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

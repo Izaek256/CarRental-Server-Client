@@ -43,7 +43,6 @@ public class CarRentalServer {
             
         } catch (IOException e) {
             System.err.println("Server error: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }
